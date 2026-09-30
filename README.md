@@ -113,14 +113,3 @@ Freelancer app/
    ```
 
 ---
-
-## 💼 Interview Talking Points
-
-> *"I architected and developed a full-stack, role-based Freelancer Project Management Platform named **FreelanceHub** using **Angular 22**, **TypeScript**, **Signals**, **PrimeNG**, and **NestJS**.*
->
-> *Key technical highlights:*
-> - *Replaced legacy NgRx boilerplate with **Angular Signals** (`signal`, `computed`) for reactive state management.*
-> - *Implemented standalone components with lazy loading via modern routing.*
-> - *Built functional HTTP interceptors for JWT token propagation and functional route guards for role-based permissions.*
-> - *Designed an invoicing engine with dynamic GST tax calculations and print/PDF formatting.*
-> - *Engineered real-time interactive task progress tracking and milestone reconciliation."*
