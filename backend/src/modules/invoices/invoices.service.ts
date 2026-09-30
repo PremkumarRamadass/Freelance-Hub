@@ -36,7 +36,7 @@ export class InvoicesService {
 
     const invoice = this.invoiceRepo.create({
       issueDate: new Date().toISOString().split('T')[0],
-      clientEmail: 'client@lancenexus.dev',
+      clientEmail: 'client@lancenexa.dev',
       ...data,
       invoiceNumber,
       subtotal,

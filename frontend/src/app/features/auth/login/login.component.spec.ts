@@ -35,7 +35,7 @@ describe('LoginComponent', () => {
   it('should initialize login form with default freelancer demo credentials', () => {
     expect(component).toBeTruthy();
     expect(component.selectedRoleMode()).toBe('FREELANCER');
-    expect(component.loginForm.get('email')?.value).toBe('prem@lancenexus.dev');
+    expect(component.loginForm.get('email')?.value).toBe('prem@lancenexa.dev');
   });
 
   it('should switch demo credentials when selectRoleMode is called', () => {
@@ -45,7 +45,7 @@ describe('LoginComponent', () => {
 
     component.selectRoleMode('ADMIN');
     expect(component.selectedRoleMode()).toBe('ADMIN');
-    expect(component.loginForm.get('email')?.value).toBe('admin@lancenexus.dev');
+    expect(component.loginForm.get('email')?.value).toBe('admin@lancenexa.dev');
   });
 
   it('should not submit if form is invalid', () => {
@@ -62,7 +62,7 @@ describe('LoginComponent', () => {
     const mockUser = {
       id: '1',
       name: 'Prem',
-      email: 'prem@lancenexus.dev',
+      email: 'prem@lancenexa.dev',
       role: 'FREELANCER' as const,
       createdAt: '2026-01-01'
     };

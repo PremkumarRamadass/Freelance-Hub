@@ -33,7 +33,7 @@ export class QuotationsService {
     const quote = this.quoteRepo.create({
       date: new Date().toISOString().split('T')[0],
       validUntil: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-      clientEmail: 'client@lancenexus.dev',
+      clientEmail: 'client@lancenexa.dev',
       clientName: 'Client',
       ...data,
       quoteNumber,

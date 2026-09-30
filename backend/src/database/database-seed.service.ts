@@ -59,7 +59,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     await this.userRepo.save([
       {
         name: 'Premkumar',
-        email: 'prem@lancenexus.dev',
+        email: 'prem@lancenexa.dev',
         password: freelancerPass,
         role: 'FREELANCER',
         title: 'Full Stack Architect & Consultant',
@@ -81,10 +81,10 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
       },
       {
         name: 'Super Admin',
-        email: 'admin@lancenexus.dev',
+        email: 'admin@lancenexa.dev',
         password: adminPass,
         role: 'ADMIN',
-        companyName: 'LanceNexus Agency',
+        companyName: 'LanceNexa Agency',
         title: 'Operations Director',
         phone: '+91 99999 88888',
         avatarUrl:
