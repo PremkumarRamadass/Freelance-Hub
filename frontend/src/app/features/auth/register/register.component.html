@@ -1,0 +1,291 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <!-- Left Hero Illustration Panel -->
+    <div class="auth-hero">
+      <div class="hero-brand">
+        <div class="brand-icon"><i class="pi pi-bolt"></i></div>
+        <span class="brand-text">Freelance<span>Hub</span></span>
+      </div>
+
+      <div class="hero-content">
+        @if (selectedRole() === 'CLIENT') {
+          <h2>Hire Top Talent & Track Deliverables</h2>
+          <p class="hero-sub">Review project proposals, approve GST quotations, and monitor real-time sprint milestones.</p>
+          <div class="hero-graphic">
+            <div class="graphic-card">
+              <i class="pi pi-building text-blue-500"></i>
+              <div>
+                <strong>Client Workspace</strong>
+                <span>Dedicated project visibility</span>
+              </div>
+            </div>
+            <div class="graphic-card float-right">
+              <i class="pi pi-shield-check text-emerald-500"></i>
+              <div>
+                <strong>Secured Escrow & GST</strong>
+                <span>Direct UPI / Bank invoices</span>
+              </div>
+            </div>
+          </div>
+        } @else if (selectedRole() === 'ADMIN') {
+          <h2>Scale Agency Operations Seamlessly</h2>
+          <p class="hero-sub">Full oversight over freelance talents, client contracts, profit margins, and payouts.</p>
+          <div class="hero-graphic">
+            <div class="graphic-card">
+              <i class="pi pi-shield text-indigo-500"></i>
+              <div>
+                <strong>Agency Command Center</strong>
+                <span>Operations & team management</span>
+              </div>
+            </div>
+            <div class="graphic-card float-right">
+              <i class="pi pi-chart-pie text-purple-500"></i>
+              <div>
+                <strong>Financial Reconciliation</strong>
+                <span>Real-time billing analytics</span>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <h2>Turn Your Skills Into Sustainable Success</h2>
+          <p class="hero-sub">Manage clients, projects, tasks, and automated GST billing in one unified platform.</p>
+          <div class="hero-graphic">
+            <div class="graphic-card">
+              <i class="pi pi-chart-line text-blue-500"></i>
+              <div>
+                <strong>Instant Analytics</strong>
+                <span>Track billings & milestones</span>
+              </div>
+            </div>
+            <div class="graphic-card float-right">
+              <i class="pi pi-file-edit text-purple-500"></i>
+              <div>
+                <strong>GST Quotations</strong>
+                <span>Automated PDF invoices</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="hero-testimonial">
+        <i class="pi pi-verified text-blue-600"></i>
+        <span>Trusted by 1,200+ freelancers and Indian tech agencies</span>
+      </div>
+    </div>
+
+    <!-- Right Register Form Card -->
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <h3>Create Your Account</h3>
+        <p>Step 1: Choose what you are joining as</p>
+      </div>
+
+      <!-- 3-Role Decision Selector Grid -->
+      <div class="role-selector-grid">
+        <button
+          type="button"
+          class="role-card-btn"
+          [class.selected]="selectedRole() === 'FREELANCER'"
+          (click)="selectRole('FREELANCER')"
+        >
+          <div class="role-icon-box freelancer">
+            <i class="pi pi-user"></i>
+          </div>
+          <div class="role-text">
+            <strong>Freelancer</strong>
+            <span>Manage gigs & clients</span>
+          </div>
+          @if (selectedRole() === 'FREELANCER') {
+            <i class="pi pi-check-circle check-icon"></i>
+          }
+        </button>
+
+        <button
+          type="button"
+          class="role-card-btn"
+          [class.selected]="selectedRole() === 'CLIENT'"
+          (click)="selectRole('CLIENT')"
+        >
+          <div class="role-icon-box client">
+            <i class="pi pi-building"></i>
+          </div>
+          <div class="role-text">
+            <strong>Client / Company</strong>
+            <span>Hire & approve work</span>
+          </div>
+          @if (selectedRole() === 'CLIENT') {
+            <i class="pi pi-check-circle check-icon"></i>
+          }
+        </button>
+
+        <button
+          type="button"
+          class="role-card-btn"
+          [class.selected]="selectedRole() === 'ADMIN'"
+          (click)="selectRole('ADMIN')"
+        >
+          <div class="role-icon-box admin">
+            <i class="pi pi-shield"></i>
+          </div>
+          <div class="role-text">
+            <strong>Agency Admin</strong>
+            <span>Run agency operations</span>
+          </div>
+          @if (selectedRole() === 'ADMIN') {
+            <i class="pi pi-check-circle check-icon"></i>
+          }
+        </button>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="auth-alert">
+          <i class="pi pi-exclamation-circle"></i>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
+        <!-- Name Field -->
+        <div class="form-group">
+          <label for="name">
+            @if (selectedRole() === 'CLIENT') {
+              Contact Person Full Name
+            } @else if (selectedRole() === 'ADMIN') {
+              Agency Administrator Name
+            } @else {
+              Full Name
+            }
+          </label>
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            [placeholder]="selectedRole() === 'CLIENT' ? 'e.g. Rahul Sharma' : (selectedRole() === 'ADMIN' ? 'e.g. Rajesh Kumar' : 'e.g. Premkumar')"
+          />
+        </div>
+
+        <!-- Conditional Fields Based on Role -->
+        @if (selectedRole() === 'FREELANCER') {
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="title">Professional Skill / Title</label>
+              <input
+                id="title"
+                type="text"
+                formControlName="title"
+                placeholder="e.g. Full Stack Architect"
+              />
+            </div>
+            <div class="form-group">
+              <label for="hourlyRate">Hourly Rate (₹/hr)</label>
+              <input
+                id="hourlyRate"
+                type="number"
+                formControlName="hourlyRate"
+                placeholder="2500"
+              />
+            </div>
+          </div>
+        } @else if (selectedRole() === 'CLIENT') {
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="companyName">Company / Business Name</label>
+              <input
+                id="companyName"
+                type="text"
+                formControlName="companyName"
+                placeholder="e.g. ABC Technologies Pvt Ltd"
+              />
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone / WhatsApp</label>
+              <input
+                id="phone"
+                type="text"
+                formControlName="phone"
+                placeholder="+91 98200 12345"
+              />
+            </div>
+          </div>
+        } @else if (selectedRole() === 'ADMIN') {
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="adminCompany">Agency / Studio Name</label>
+              <input
+                id="adminCompany"
+                type="text"
+                formControlName="companyName"
+                placeholder="e.g. Apex Design Agency"
+              />
+            </div>
+            <div class="form-group">
+              <label for="passcode">Agency Passcode</label>
+              <input
+                id="passcode"
+                type="text"
+                formControlName="passcode"
+                placeholder="ADMIN2026"
+              />
+            </div>
+          </div>
+        }
+
+        <!-- Email Field -->
+        <div class="form-group">
+          <label for="regEmail">
+            {{ selectedRole() === 'CLIENT' ? 'Official Work Email' : (selectedRole() === 'ADMIN' ? 'Agency Admin Email' : 'Email Address') }}
+          </label>
+          <input
+            id="regEmail"
+            type="email"
+            formControlName="email"
+            [placeholder]="selectedRole() === 'CLIENT' ? 'rahul@company.com' : (selectedRole() === 'ADMIN' ? 'admin@agency.com' : 'you@example.com')"
+          />
+        </div>
+
+        <!-- Password and Confirm Password in 2-Columns -->
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="regPassword">Password</label>
+            <input
+              id="regPassword"
+              type="password"
+              formControlName="password"
+              placeholder="Min 6 characters"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              formControlName="confirmPassword"
+              placeholder="Confirm password"
+            />
+          </div>
+        </div>
+
+        <label class="terms-label">
+          <input type="checkbox" formControlName="agreeTerms" />
+          <span>I agree to the <a href="javascript:void(0)">FreelanceHub Terms of Service</a></span>
+        </label>
+
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="registerForm.invalid || isLoading()">
+          @if (isLoading()) {
+            <i class="pi pi-spin pi-spinner"></i>
+            <span>Creating {{ selectedRole() | titlecase }} Account...</span>
+          } @else {
+            <span>Sign Up as {{ selectedRole() === 'CLIENT' ? 'Client' : (selectedRole() === 'ADMIN' ? 'Agency Admin' : 'Freelancer') }}</span>
+          }
+        </button>
+
+        <div class="auth-card-footer">
+          <span>Already registered?</span>
+          <a routerLink="/login" class="link-bold">Sign In to your account</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

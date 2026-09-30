@@ -1,0 +1,146 @@
+<div class="quotations-container">
+  <!-- Page Header -->
+  <div class="page-top-header">
+    <div>
+      <h2>Quotations</h2>
+      <p class="subtitle">
+        {{ authService.isClient() ? 'Review, approve, and track project proposals from your freelance partner.' : 'Create and manage project quotations.' }}
+      </p>
+    </div>
+    @if (!authService.isClient()) {
+      <button type="button" class="btn btn-primary" (click)="openCreateModal()">
+        <i class="pi pi-plus"></i> New Quotation
+      </button>
+    }
+  </div>
+
+  <!-- Quotations Table Card -->
+  <div class="card table-card">
+    <div class="table-responsive">
+      <table class="quotes-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Client</th>
+            <th>Project</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (quote of quotationService.quotations(); track quote.id; let idx = $index) {
+            <tr>
+              <td class="text-slate-400">{{ idx + 1 }}</td>
+              <td class="font-semibold text-slate-900">{{ quote.clientCompany }}</td>
+              <td class="text-slate-700">{{ quote.projectTitle }}</td>
+              <td class="font-semibold text-slate-900">{{ quote.total | currencyInr }}</td>
+              <td>
+                <p-tag
+                  [value]="quote.status"
+                  [severity]="quote.status === 'Accepted' ? 'success' : (quote.status === 'Sent' ? 'info' : (quote.status === 'Rejected' ? 'danger' : 'secondary'))"
+                  [rounded]="true"
+                />
+              </td>
+              <td class="text-right">
+                <div class="table-actions">
+                  <a [routerLink]="['/quotations', quote.id]" class="icon-btn" title="View Quotation">
+                    <i class="pi pi-eye"></i>
+                  </a>
+                  @if (authService.isClient()) {
+                    <a [routerLink]="['/quotations', quote.id]" class="btn-review-sm">
+                      <i class="pi pi-check"></i> Review & Approve
+                    </a>
+                  } @else {
+                    <button type="button" class="icon-btn" (click)="previewQuote(quote)" title="Edit">
+                      <i class="pi pi-pencil"></i>
+                    </button>
+                    <button type="button" class="icon-btn text-red-500" (click)="deleteQuote(quote.id)" title="Delete">
+                      <i class="pi pi-trash"></i>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer / Pagination -->
+    <div class="table-footer">
+      <span class="pagination-info">Showing 1 to {{ quotationService.quotations().length }} of 6 quotations</span>
+      <div class="pagination-btns">
+        <button type="button" class="page-nav-btn"><i class="pi pi-chevron-left"></i></button>
+        <button type="button" class="page-num-btn active">1</button>
+        <button type="button" class="page-num-btn">2</button>
+        <button type="button" class="page-nav-btn"><i class="pi pi-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PrimeNG Create Quotation Dialog -->
+  <p-dialog
+    header="Create Project Quotation"
+    [visible]="showCreateModal()"
+    (visibleChange)="showCreateModal.set($event)"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '92vw', maxWidth: '720px' }"
+  >
+    <form [formGroup]="quoteForm" (ngSubmit)="saveQuotation()" class="modal-form-content">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Client *</label>
+          <select formControlName="clientId">
+            <option value="" disabled>Select Client</option>
+            @for (c of clientService.clients(); track c.id) {
+              <option [value]="c.id">{{ c.company }} ({{ c.name }})</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Project Title *</label>
+          <input pInputText type="text" formControlName="projectTitle" placeholder="e.g. Website Development" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Valid Until *</label>
+          <input pInputText type="date" formControlName="validUntil" />
+        </div>
+        <div class="form-group">
+          <label>GST Tax % *</label>
+          <input pInputText type="number" formControlName="taxPercent" />
+        </div>
+      </div>
+
+      <div class="items-builder-box">
+        <div class="flex justify-between items-center mb-2">
+          <span class="font-bold text-xs text-slate-700 uppercase tracking-wider">Line Items</span>
+          <p-button label="Add Item" icon="pi pi-plus" size="small" [outlined]="true" (onClick)="addItem()" />
+        </div>
+
+        <div formArrayName="items" class="flex flex-col gap-2">
+          @for (item of itemsArray.controls; track $index; let idx = $index) {
+            <div [formGroupName]="idx" class="flex gap-2 items-center">
+              <input pInputText type="text" formControlName="description" placeholder="Description" class="flex-2" />
+              <input pInputText type="number" formControlName="quantity" placeholder="Qty" class="w-16" />
+              <input pInputText type="number" formControlName="rate" placeholder="Rate (₹)" class="w-28" />
+              <button type="button" class="icon-btn text-red-500" (click)="removeItem(idx)" *ngIf="itemsArray.length > 1">
+                <i class="pi pi-trash"></i>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="modal-footer-btns">
+        <p-button label="Cancel" severity="secondary" [outlined]="true" (onClick)="showCreateModal.set(false)" />
+        <p-button type="submit" label="Generate Quotation" icon="pi pi-file-check" [disabled]="quoteForm.invalid" />
+      </div>
+    </form>
+  </p-dialog>
+</div>

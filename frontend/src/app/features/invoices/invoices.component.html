@@ -1,0 +1,149 @@
+<div class="invoices-container">
+  <!-- Top Tabs -->
+  <div class="invoices-top-tabs">
+    <button
+      type="button"
+      class="sub-tab"
+      [class.active]="selectedTab() === 'invoices'"
+      (click)="selectedTab.set('invoices')"
+    >
+      Invoices
+    </button>
+    <button
+      type="button"
+      class="sub-tab"
+      [class.active]="selectedTab() === 'payments'"
+      (click)="selectedTab.set('payments')"
+    >
+      Payments
+    </button>
+  </div>
+
+  <div class="page-top-header">
+    <div>
+      <h2>{{ selectedTab() === 'invoices' ? 'Invoices' : 'Payments & Ledger' }}</h2>
+      <p class="subtitle">Manage your {{ selectedTab() === 'invoices' ? 'invoices and billing statements' : 'recorded milestone transactions' }}.</p>
+    </div>
+    @if (!authService.isClient()) {
+      <button type="button" class="btn btn-primary" (click)="openAddModal()">
+        <i class="pi pi-plus"></i> New {{ selectedTab() === 'invoices' ? 'Invoice' : 'Payment' }}
+      </button>
+    }
+  </div>
+
+  <!-- Invoices Table Card -->
+  <div class="card table-card">
+    <div class="table-responsive">
+      <table class="invoices-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Invoice No</th>
+            <th>Client</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of paymentService.payments(); track item.id; let idx = $index) {
+            <tr>
+              <td class="text-slate-400">{{ idx + 1 }}</td>
+              <td>
+                <a [routerLink]="['/invoices', item.id]" class="inv-link">
+                  {{ item.invoiceNumber }}
+                </a>
+              </td>
+              <td class="font-semibold text-slate-800">{{ item.clientCompany }}</td>
+              <td class="font-semibold text-slate-900">{{ item.amount | currencyInr }}</td>
+              <td class="text-slate-500">{{ item.paymentDate || item.dueDate }}</td>
+              <td>
+                <p-tag
+                  [value]="item.status"
+                  [severity]="item.status === 'Paid' ? 'success' : (item.status === 'Pending' ? 'warn' : 'danger')"
+                  [rounded]="true"
+                />
+              </td>
+              <td class="text-right">
+                <div class="table-actions">
+                  <a [routerLink]="['/invoices', item.id]" class="icon-btn" title="View Details">
+                    <i class="pi pi-eye"></i>
+                  </a>
+                  @if (authService.isClient() && item.status === 'Pending') {
+                    <a [routerLink]="['/invoices', item.id]" class="btn-pay-sm">
+                      <i class="pi pi-credit-card"></i> Pay Now
+                    </a>
+                  }
+                  @if (!authService.isClient()) {
+                    <button type="button" class="icon-btn" (click)="markPaid(item)" title="Mark Paid" *ngIf="item.status === 'Pending'">
+                      <i class="pi pi-check text-emerald-600"></i>
+                    </button>
+                    <button type="button" class="icon-btn text-red-500" title="Delete">
+                      <i class="pi pi-trash"></i>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer / Pagination -->
+    <div class="table-footer">
+      <span class="pagination-info">Showing 1 to {{ paymentService.payments().length }} of 6 invoices</span>
+      <div class="pagination-btns">
+        <button type="button" class="page-nav-btn"><i class="pi pi-chevron-left"></i></button>
+        <button type="button" class="page-num-btn active">1</button>
+        <button type="button" class="page-num-btn">2</button>
+        <button type="button" class="page-nav-btn"><i class="pi pi-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PrimeNG Record New Invoice Dialog -->
+  <p-dialog
+    header="Record New Invoice"
+    [visible]="showModal()"
+    (visibleChange)="showModal.set($event)"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '92vw', maxWidth: '580px' }"
+  >
+    <form [formGroup]="invoiceForm" (ngSubmit)="saveInvoice()" class="modal-form-content">
+      <div class="form-group">
+        <label>Associated Project *</label>
+        <select formControlName="projectId">
+          <option value="" disabled>Select Project</option>
+          @for (p of projectService.projects(); track p.id) {
+            <option [value]="p.id">{{ p.title }} ({{ p.clientCompany }})</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Amount (INR) *</label>
+          <input pInputText type="number" formControlName="amount" placeholder="25000" />
+        </div>
+        <div class="form-group">
+          <label>Due Date *</label>
+          <input pInputText type="date" formControlName="dueDate" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Description / Notes</label>
+        <input pInputText type="text" formControlName="notes" placeholder="Advance Payment / Milestone 1" />
+      </div>
+
+      <div class="modal-footer-btns">
+        <p-button label="Cancel" severity="secondary" [outlined]="true" (onClick)="showModal.set(false)" />
+        <p-button type="submit" label="Save Invoice" icon="pi pi-check" [disabled]="invoiceForm.invalid" />
+      </div>
+    </form>
+  </p-dialog>
+</div>

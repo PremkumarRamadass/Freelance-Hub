@@ -1,0 +1,55 @@
+<aside class="app-sidebar" [class.collapsed]="isCollapsed()">
+  <!-- Brand Logo -->
+  <div class="sidebar-brand">
+    <div class="brand-icon" [class.client-portal]="authService.isClient()">
+      <i [class]="authService.isClient() ? 'pi pi-building' : 'pi pi-bolt'"></i>
+    </div>
+    @if (!isCollapsed()) {
+      <div class="brand-text">
+        <span class="brand-name">Freelance<span>Hub</span></span>
+        @if (authService.isClient()) {
+          <span class="portal-badge">CLIENT</span>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Navigation Menu -->
+  <nav class="sidebar-nav">
+    <ul class="nav-list">
+      @for (item of navItems(); track item.route) {
+        <li class="nav-item">
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            class="nav-link"
+            [title]="item.label"
+          >
+            <i [class]="'pi ' + item.icon + ' nav-icon'"></i>
+            @if (!isCollapsed()) {
+              <span class="nav-label">{{ item.label }}</span>
+              @if (item.badge) {
+                <span class="nav-badge">{{ item.badge }}</span>
+              }
+            }
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+
+  <!-- User / Footer Toggle -->
+  <div class="sidebar-footer">
+    <button
+      type="button"
+      class="collapse-btn"
+      (click)="toggleCollapse()"
+      [title]="isCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+    >
+      <i [class]="isCollapsed() ? 'pi pi-angle-double-right' : 'pi pi-angle-double-left'"></i>
+      @if (!isCollapsed()) {
+        <span>Collapse Menu</span>
+      }
+    </button>
+  </div>
+</aside>

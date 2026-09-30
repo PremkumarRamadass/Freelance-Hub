@@ -1,0 +1,33 @@
+<div class="notifications-container">
+  <div class="page-top-header">
+    <div>
+      <h2>Notifications & Reminders</h2>
+      <p class="subtitle">Stay updated on milestones, deadlines, and pending invoice remittances.</p>
+    </div>
+    <button type="button" class="btn btn-outline" (click)="notificationService.markAllAsRead()">
+      <i class="pi pi-check"></i> Mark all as read
+    </button>
+  </div>
+
+  <div class="card notifications-card">
+    <div class="notif-list">
+      @for (item of notificationService.notifications(); track item.id) {
+        <div class="notif-row" [class.unread]="!item.read" (click)="notificationService.markAsRead(item.id)">
+          <div class="notif-icon-box" [class]="item.type">
+            <i [class]="'pi ' + (item.type === 'deadline' ? 'pi-clock' : item.type === 'payment' ? 'pi-wallet' : 'pi-bell')"></i>
+          </div>
+          <div class="notif-body">
+            <div class="notif-title-line">
+              <span class="notif-title font-semibold text-slate-900">{{ item.title }}</span>
+              <span class="notif-time text-slate-400 text-xs">{{ item.timestamp }}</span>
+            </div>
+            <p class="notif-desc text-slate-600 text-sm">{{ item.message }}</p>
+          </div>
+          @if (!item.read) {
+            <span class="unread-dot"></span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

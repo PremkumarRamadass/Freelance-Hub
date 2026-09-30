@@ -1,0 +1,281 @@
+<div class="dashboard-container">
+  <!-- Top Welcome Header -->
+  <div class="dash-header">
+    <div>
+      <h2>Dashboard</h2>
+      @if (authService.isClient()) {
+        <p class="subtitle">Welcome back, {{ authService.currentUser()?.name }}! Here's the live delivery status of your projects.</p>
+      } @else {
+        <p class="subtitle">Welcome back, {{ authService.currentUser()?.name }}! Here's what's happening today.</p>
+      }
+    </div>
+    <div class="dash-header-actions">
+      <select class="time-filter-select">
+        <option>This Month</option>
+        <option>Last Month</option>
+        <option>This Quarter</option>
+        <option>This Year</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- KPI Stat Cards Row -->
+  <div class="kpi-cards-grid">
+    @if (authService.isClient()) {
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <span class="kpi-label">Active Contracts</span>
+          <h3 class="kpi-val">{{ dashboardService.portal().activeContracts }}</h3>
+          <span class="kpi-trend positive"><i class="pi pi-check"></i> Website Development</span>
+        </div>
+        <div class="kpi-icon-box purple">
+          <i class="pi pi-folder"></i>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <span class="kpi-label">Completed Milestones</span>
+          <h3 class="kpi-val">{{ dashboardService.portal().completedMilestones }}</h3>
+          <span class="kpi-trend positive"><i class="pi pi-arrow-up-right"></i> 75% delivered</span>
+        </div>
+        <div class="kpi-icon-box green">
+          <i class="pi pi-check-circle"></i>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <span class="kpi-label">Paid to Date</span>
+          <h3 class="kpi-val">{{ dashboardService.portal().paidToDate | currencyInr }}</h3>
+          <span class="kpi-trend positive"><i class="pi pi-verified"></i> Reconciled UPI</span>
+        </div>
+        <div class="kpi-icon-box emerald">
+          <i class="pi pi-wallet"></i>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <span class="kpi-label">Pending Handover Due</span>
+          <h3 class="kpi-val">{{ dashboardService.portal().pendingHandoverDue | currencyInr }}</h3>
+          <span class="kpi-trend"><i class="pi pi-clock"></i> Due on final sign-off</span>
+        </div>
+        <div class="kpi-icon-box orange">
+          <i class="pi pi-sync"></i>
+        </div>
+      </div>
+    } @else {
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <span class="kpi-label">Total Projects</span>
+          <h3 class="kpi-val">{{ dashboardService.stats().totalProjects || projectService.totalProjects() }}</h3>
+          <span class="kpi-trend positive"><i class="pi pi-arrow-up-right"></i> Active in database</span>
+        </div>
+        <div class="kpi-icon-box purple">
+          <i class="pi pi-folder"></i>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <span class="kpi-label">Active Projects</span>
+          <h3 class="kpi-val">{{ dashboardService.stats().activeProjects || projectService.activeProjects() }}</h3>
+          <span class="kpi-trend positive"><i class="pi pi-arrow-up-right"></i> Under delivery</span>
+        </div>
+        <div class="kpi-icon-box orange">
+          <i class="pi pi-sync"></i>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <span class="kpi-label">Completed Projects</span>
+          <h3 class="kpi-val">{{ dashboardService.stats().completedProjects || projectService.completedProjects() }}</h3>
+          <span class="kpi-trend positive"><i class="pi pi-arrow-up-right"></i> Delivered</span>
+        </div>
+        <div class="kpi-icon-box green">
+          <i class="pi pi-check-circle"></i>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <span class="kpi-label">Total Revenue</span>
+          <h3 class="kpi-val">{{ (dashboardService.stats().totalRevenue || projectService.totalRevenue()) | currencyInr }}</h3>
+          <span class="kpi-trend positive"><i class="pi pi-arrow-up-right"></i> Reconciled earnings</span>
+        </div>
+        <div class="kpi-icon-box emerald">
+          <i class="pi pi-wallet"></i>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Middle Row: Monthly Revenue & Project Status Donut -->
+  <div class="dash-row-grid">
+    <!-- Monthly Revenue Bar Chart -->
+    <div class="card revenue-card">
+      <div class="card-header">
+        <div class="card-title-group">
+          <h3>{{ authService.isClient() ? 'Milestone Payments Schedule' : 'Monthly Revenue' }}</h3>
+        </div>
+        <a routerLink="/invoices" class="card-link">View Invoices</a>
+      </div>
+
+      <div class="revenue-chart">
+        <div class="y-axis">
+          <span>150k</span>
+          <span>100k</span>
+          <span>50k</span>
+          <span>0</span>
+        </div>
+        <div class="chart-bars-wrap">
+          @for (bar of monthlyData(); track bar.month) {
+            <div class="chart-col">
+              @if (bar.tooltip) {
+                <div class="bar-tooltip">₹65,000</div>
+              }
+              <div class="bar-track">
+                <div class="bar-fill" [style.height.%]="bar.height" [class.highlighted]="bar.tooltip"></div>
+              </div>
+              <span class="month-lbl">{{ bar.month }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Project Status Donut Chart -->
+    <div class="card donut-card">
+      <div class="card-header">
+        <h3>Project Deliverables</h3>
+      </div>
+
+      <div class="donut-content">
+        <div class="donut-chart-wrap">
+          <svg class="donut-svg" viewBox="0 0 36 36">
+            <path
+              class="circle-bg"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+            <path
+              class="circle-seg green-seg"
+              stroke-dasharray="60, 100"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+            <path
+              class="circle-seg blue-seg"
+              stroke-dasharray="30, 100"
+              stroke-dashoffset="-60"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+            <path
+              class="circle-seg orange-seg"
+              stroke-dasharray="7, 100"
+              stroke-dashoffset="-90"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+            <path
+              class="circle-seg red-seg"
+              stroke-dasharray="3, 100"
+              stroke-dashoffset="-97"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+          </svg>
+          <div class="donut-center-text">
+            <strong>{{ taskStats().total }}</strong>
+            <span>Tasks</span>
+          </div>
+        </div>
+
+        <div class="donut-legend">
+          <div class="legend-row">
+            <span class="dot bg-green"></span>
+            <span class="legend-name">Completed</span>
+            <span class="legend-count">{{ taskStats().completed }}</span>
+          </div>
+          <div class="legend-row">
+            <span class="dot bg-blue"></span>
+            <span class="legend-name">In Progress</span>
+            <span class="legend-count">{{ taskStats().inProgress }}</span>
+          </div>
+          <div class="legend-row">
+            <span class="dot bg-orange"></span>
+            <span class="legend-name">Pending</span>
+            <span class="legend-count">{{ taskStats().pending }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Row: Recent Projects & Upcoming Deadlines -->
+  <div class="dash-row-grid">
+    <!-- Recent Projects Table -->
+    <div class="card recent-projects-card">
+      <div class="card-header">
+        <h3>{{ authService.isClient() ? 'My Active Project' : 'Recent Projects' }}</h3>
+      </div>
+
+      <div class="table-wrap">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Project Name</th>
+              <th>Client</th>
+              <th>Deadline</th>
+              <th>Progress</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of displayedProjects(); track p.id; let idx = $index) {
+              <tr>
+                <td class="text-slate-400">{{ idx + 1 }}</td>
+                <td>
+                  <a [routerLink]="['/projects', p.id]" class="proj-title-link">{{ p.name }}</a>
+                </td>
+                <td class="text-slate-600">{{ p.client }}</td>
+                <td class="text-slate-600">{{ p.deadline }}</td>
+                <td class="progress-cell">
+                  <div class="progress-track-sm">
+                    <div class="progress-fill-sm" [style.width.%]="p.progress"></div>
+                  </div>
+                  <span class="progress-val">{{ p.progress }}%</span>
+                </td>
+                <td>
+                  <app-status-badge [status]="p.status" />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Upcoming Deadlines Card -->
+    <div class="card deadlines-card">
+      <div class="card-header">
+        <h3>Upcoming Deliverables</h3>
+        <a routerLink="/projects" class="card-link">View All</a>
+      </div>
+
+      <div class="deadlines-list">
+        @for (item of displayedDeadlines(); track item.id) {
+          <div class="deadline-item">
+            <div class="deadline-info">
+              <span class="client-title">{{ item.client }}</span>
+              <span class="proj-sub">{{ item.project }}</span>
+            </div>
+            <div class="deadline-badge-box">
+              <span class="days-badge" [class.urgent]="item.days <= 3">{{ item.daysLeft }}</span>
+              <span class="due-date-txt">{{ item.dueDate }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

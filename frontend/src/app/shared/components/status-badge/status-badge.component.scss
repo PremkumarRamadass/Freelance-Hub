@@ -1,0 +1,65 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Active / Completed / Paid / Accepted */
+.badge-active,
+.badge-completed,
+.badge-paid,
+.badge-accepted,
+.badge-ontrack,
+.badge-on-track {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+/* In Progress / Sent / Lead */
+.badge-inprogress,
+.badge-in-progress,
+.badge-sent,
+.badge-lead {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+/* Planning / Draft / Pending / On Hold */
+.badge-planning,
+.badge-draft,
+.badge-pending,
+.badge-onhold,
+.badge-on-hold {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+/* Overdue / Rejected / At Risk / Canceled */
+.badge-overdue,
+.badge-rejected,
+.badge-inactive,
+.badge-atrisk,
+.badge-at-risk,
+.badge-canceled {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* Expired */
+.badge-expired {
+  background: #f1f5f9;
+  color: #64748b;
+}

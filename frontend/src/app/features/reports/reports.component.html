@@ -1,0 +1,73 @@
+<div class="reports-container">
+  <!-- Page Header -->
+  <div class="page-top-header">
+    <div>
+      <h2>Reports</h2>
+      <p class="subtitle">Analyze your business performance</p>
+    </div>
+    <div class="header-actions">
+      <select class="time-select">
+        <option>This Year</option>
+        <option>Last Year</option>
+        <option>All Time</option>
+      </select>
+      <button type="button" class="btn btn-outline" (click)="exportReport()">
+        <i class="pi pi-download"></i> Export CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- 4 KPI Cards Row -->
+  <div class="kpi-cards-grid">
+    <div class="kpi-card">
+      <span class="kpi-label">Total Revenue</span>
+      <h3 class="kpi-val">{{ summary().totalCollected | currencyInr }}</h3>
+      <span class="kpi-trend positive"><i class="pi pi-arrow-up-right"></i> +{{ summary().profitMarginPercent }}% margin</span>
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-label">Pending Payment</span>
+      <h3 class="kpi-val">{{ summary().pendingCollection | currencyInr }}</h3>
+      <span class="kpi-sub text-slate-400">Invoices awaiting collection</span>
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-label">Completed Projects</span>
+      <h3 class="kpi-val">{{ summary().completedProjectsCount }}</h3>
+      <span class="kpi-trend positive"><i class="pi pi-arrow-up-right"></i> Active: {{ summary().activeProjectsCount }}</span>
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-label">Total Clients</span>
+      <h3 class="kpi-val">{{ summary().totalClientsCount }}</h3>
+      <span class="kpi-trend positive"><i class="pi pi-arrow-up-right"></i> Enterprise clients</span>
+    </div>
+  </div>
+
+  <!-- Revenue Overview Chart Card -->
+  <div class="card chart-card">
+    <div class="card-header">
+      <h3>Revenue Overview</h3>
+    </div>
+
+    <div class="revenue-chart">
+      <div class="y-axis">
+        <span>150k</span>
+        <span>100k</span>
+        <span>50k</span>
+        <span>0</span>
+      </div>
+      <div class="chart-bars-wrap">
+        @for (b of monthlyData(); track b.month) {
+          <div class="chart-col">
+            <div class="bar-val">{{ b.amount }}k</div>
+            <div class="bar-track">
+              <div class="bar-fill" [style.height.%]="b.pct"></div>
+            </div>
+            <span class="month-lbl">{{ b.month }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

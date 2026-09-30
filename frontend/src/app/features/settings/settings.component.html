@@ -1,0 +1,103 @@
+<div class="settings-container">
+  <!-- Header -->
+  <div class="page-top-header">
+    <div>
+      <h2>Profile Settings</h2>
+      <p class="subtitle">Manage your personal information.</p>
+    </div>
+  </div>
+
+  <!-- Settings Card -->
+  <div class="card settings-card">
+    <!-- Sub Tabs -->
+    <div class="settings-tabs">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'profile'"
+        (click)="activeTab.set('profile')"
+      >
+        Profile
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'password'"
+        (click)="activeTab.set('password')"
+      >
+        Change Password
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'notifications'"
+        (click)="activeTab.set('notifications')"
+      >
+        Notifications
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'preferences'"
+        (click)="activeTab.set('preferences')"
+      >
+        Preferences
+      </button>
+    </div>
+
+    <!-- Tab Content -->
+    @if (activeTab() === 'profile') {
+      <div class="profile-layout">
+        <!-- Avatar Side Column -->
+        <div class="avatar-col">
+          <div class="avatar-wrap">
+            <img
+              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80"
+              alt="Profile Avatar"
+              class="profile-img"
+            />
+            <button type="button" class="avatar-upload-badge" title="Change Avatar">
+              <i class="pi pi-camera"></i>
+            </button>
+          </div>
+          <span class="user-display-name">Premkumar</span>
+          <span class="user-display-email">prem@freelancehub.dev</span>
+        </div>
+
+        <!-- Form Column -->
+        <form [formGroup]="profileForm" (ngSubmit)="updateProfile()" class="profile-form">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" formControlName="name" placeholder="Premkumar" />
+          </div>
+
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" formControlName="email" placeholder="prem@freelancehub.dev" />
+          </div>
+
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="text" formControlName="phone" placeholder="+91 98765 43210" />
+          </div>
+
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" formControlName="location" placeholder="Chennai, India" />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+              Update Profile
+            </button>
+          </div>
+        </form>
+      </div>
+    } @else {
+      <div class="placeholder-section">
+        <i class="pi pi-cog text-3xl text-slate-300"></i>
+        <p>{{ activeTab() | titlecase }} settings are currently configured with default enterprise parameters.</p>
+      </div>
+    }
+  </div>
+</div>

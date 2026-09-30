@@ -1,0 +1,228 @@
+<div class="project-details-container">
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a routerLink="/projects">Projects</a>
+    <i class="pi pi-angle-right"></i>
+    <span>{{ project()?.title || 'Website Development' }}</span>
+  </div>
+
+  <!-- Header -->
+  <div class="proj-head">
+    <div class="title-row">
+      <div class="title-with-badge">
+        <h2>{{ project()?.title || 'Website Development' }}</h2>
+        <app-status-badge [status]="project()?.status || 'Active'" />
+      </div>
+      <p class="proj-subtitle">{{ project()?.description || 'Full website development with modern UI/UX and CMS integration.' }}</p>
+    </div>
+    <div class="proj-head-actions">
+      <button type="button" class="btn btn-outline"><i class="pi pi-pencil"></i> Edit</button>
+      <button type="button" class="btn btn-outline icon-only"><i class="pi pi-ellipsis-h"></i></button>
+    </div>
+  </div>
+
+  <!-- Top Metrics Bar -->
+  <div class="top-metrics-card">
+    <div class="metric-item">
+      <span class="m-label">Client</span>
+      <span class="m-value text-blue-600 font-semibold">{{ project()?.clientCompany || 'ABC Pvt Ltd' }}</span>
+    </div>
+    <div class="metric-item">
+      <span class="m-label">Start Date</span>
+      <span class="m-value font-medium">{{ project()?.startDate || '01 Oct 2026' }}</span>
+    </div>
+    <div class="metric-item">
+      <span class="m-label">Deadline</span>
+      <span class="m-value font-medium">{{ project()?.deadline || '30 Nov 2026' }}</span>
+    </div>
+    <div class="metric-item progress-metric">
+      <div class="flex justify-between text-xs mb-1">
+        <span class="m-label">Progress</span>
+        <span class="font-bold">{{ project()?.progress || 75 }}%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" [style.width.%]="project()?.progress || 75"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-nav">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'overview'"
+      (click)="activeTab.set('overview')"
+    >
+      <i class="pi pi-info-circle"></i> Overview
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'tasks'"
+      (click)="activeTab.set('tasks')"
+    >
+      <i class="pi pi-check-square"></i> Tasks
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'files'"
+      (click)="activeTab.set('files')"
+    >
+      <i class="pi pi-folder"></i> Files
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'payments'"
+      (click)="activeTab.set('payments')"
+    >
+      <i class="pi pi-credit-card"></i> Payments
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'activity'"
+      (click)="activeTab.set('activity')"
+    >
+      <i class="pi pi-clock"></i> Activity
+    </button>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="details-content-grid">
+    <!-- Left Column (Overview / Details) -->
+    <div class="details-main card">
+      @if (activeTab() === 'overview') {
+        <div class="section-group">
+          <h4>Project Description</h4>
+          <p class="desc-text">
+            {{ project()?.description || 'Develop a responsive website with modern UI/UX, CMS integration and SEO optimization.' }}
+          </p>
+        </div>
+
+        <div class="section-group">
+          <h4>Technologies</h4>
+          <div class="tech-pills">
+            @for (t of (project()?.tags || ['Angular', 'Node.js', 'MongoDB', 'Tailwind CSS']); track t) {
+              <span class="tech-pill">{{ t }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="meta-details-grid">
+          <div class="meta-col">
+            <span class="m-label">Budget</span>
+            <span class="m-val-bold">{{ (project()?.budget || 75000) | currencyInr }}</span>
+          </div>
+          <div class="meta-col">
+            <span class="m-label">Status</span>
+            <app-status-badge [status]="project()?.status || 'Active'" />
+          </div>
+          <div class="meta-col">
+            <span class="m-label">Start Date</span>
+            <span class="m-val">{{ project()?.startDate || '01 Oct 2026' }}</span>
+          </div>
+          <div class="meta-col">
+            <span class="m-label">Created By</span>
+            <span class="m-val font-semibold">Premkumar</span>
+          </div>
+          <div class="meta-col">
+            <span class="m-label">Deadline</span>
+            <span class="m-val text-red-600 font-semibold">{{ project()?.deadline || '30 Nov 2026' }}</span>
+          </div>
+          <div class="meta-col">
+            <span class="m-label">Priority</span>
+            <span class="priority-badge high">High</span>
+          </div>
+        </div>
+      } @else if (activeTab() === 'tasks') {
+        <div class="tasks-tab-view">
+          <h4>Project Tasks ({{ project()?.tasks?.length || 5 }})</h4>
+          <div class="tasks-list">
+            @for (t of project()?.tasks || []; track t.id) {
+              <div class="task-row">
+                <input type="checkbox" [checked]="t.completed" (change)="toggleTask(t.id)" />
+                <span class="task-title" [class.done]="t.completed">{{ t.title }}</span>
+                <span class="task-due">{{ t.dueDate }}</span>
+                <app-status-badge [status]="t.completed ? 'Completed' : 'Pending'" />
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="placeholder-tab">
+          <i class="pi pi-inbox text-3xl text-slate-300"></i>
+          <p>No extra documents uploaded yet.</p>
+        </div>
+      }
+    </div>
+
+    <!-- Right Sidebar (Team & Milestones) -->
+    <div class="details-side">
+      <!-- Team Members Card -->
+      <div class="card team-card">
+        <div class="side-card-header">
+          <h4>Team Members</h4>
+        </div>
+        <div class="team-list">
+          <div class="member-item">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Avatar" class="avatar" />
+            <div class="member-meta">
+              <span class="member-name">Premkumar</span>
+              <span class="member-role">Project Owner</span>
+            </div>
+          </div>
+          <div class="member-item">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Avatar" class="avatar" />
+            <div class="member-meta">
+              <span class="member-name">Rahul</span>
+              <span class="member-role">Client</span>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn-add-member">
+          <i class="pi pi-plus"></i> Add Member
+        </button>
+      </div>
+
+      <!-- Milestones Card -->
+      <div class="card milestones-card">
+        <div class="side-card-header">
+          <h4>Milestones</h4>
+        </div>
+        <div class="milestones-list">
+          <div class="milestone-row">
+            <div class="m-left">
+              <i class="pi pi-circle-fill text-xs text-emerald-500"></i>
+              <span>Design Phase</span>
+            </div>
+            <app-status-badge status="Completed" />
+          </div>
+          <div class="milestone-row">
+            <div class="m-left">
+              <i class="pi pi-circle-fill text-xs text-blue-500"></i>
+              <span>Development</span>
+            </div>
+            <app-status-badge status="In Progress" />
+          </div>
+          <div class="milestone-row">
+            <div class="m-left">
+              <i class="pi pi-circle-fill text-xs text-slate-300"></i>
+              <span>Testing</span>
+            </div>
+            <app-status-badge status="Pending" />
+          </div>
+          <div class="milestone-row">
+            <div class="m-left">
+              <i class="pi pi-circle-fill text-xs text-slate-300"></i>
+              <span>Deployment</span>
+            </div>
+            <app-status-badge status="Pending" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

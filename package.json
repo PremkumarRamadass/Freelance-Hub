@@ -1,0 +1,23 @@
+{
+  "name": "freelancer-platform",
+  "version": "1.0.0",
+  "description": "Enterprise Freelancer Project Management Platform (Angular 22 + NestJS)",
+  "scripts": {
+    "start:frontend": "npm --prefix frontend start",
+    "start:backend": "npm --prefix backend run start:dev",
+    "build:frontend": "npm --prefix frontend run build",
+    "build:backend": "npm --prefix backend run build",
+    "test:frontend": "npm --prefix frontend test",
+    "test:backend": "npm --prefix backend test"
+  },
+  "keywords": [
+    "angular22",
+    "nestjs",
+    "freelancer",
+    "primeng",
+    "typescript",
+    "signals"
+  ],
+  "author": "Prem Kumar",
+  "license": "MIT"
+}

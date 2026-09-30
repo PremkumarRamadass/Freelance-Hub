@@ -1,0 +1,169 @@
+<div class="inv-details-container">
+  <!-- Top Header with Actions -->
+  <div class="details-top-header">
+    <div class="title-with-badge">
+      <h2>{{ invoice()?.invoiceNumber || 'Invoice #INV-001' }}</h2>
+      <p-tag
+        [value]="invoice()?.status || 'Paid'"
+        [severity]="invoice()?.status === 'Paid' ? 'success' : (invoice()?.status === 'Pending' ? 'warn' : 'danger')"
+        [rounded]="true"
+      />
+    </div>
+    <div class="header-actions">
+      @if (invoice()?.status === 'Pending') {
+        <p-button
+          [label]="'Pay Now (' + ((invoice()?.amount || 0) | currencyInr) + ')'"
+          icon="pi pi-credit-card"
+          severity="success"
+          (onClick)="openPaymentModal()"
+        />
+      }
+      <p-button label="Download PDF" icon="pi pi-download" severity="secondary" [outlined]="true" (onClick)="printInvoice()" />
+    </div>
+  </div>
+
+  @if (paymentSuccess()) {
+    <div class="payment-alert success">
+      <i class="pi pi-check-circle"></i>
+      <div>
+        <strong>Payment Successful!</strong>
+        <span>₹{{ invoice()?.amount | number }} received via {{ invoice()?.method || 'UPI' }}. Transaction Ref: {{ invoice()?.transactionRef }}. Receipt sent to your email.</span>
+      </div>
+    </div>
+  }
+
+  <!-- Document Card -->
+  <div class="card invoice-paper-card" id="printable-inv">
+    <!-- Meta Info Box -->
+    <div class="inv-meta-row">
+      <div class="meta-item">
+        <span class="m-label">Client</span>
+        <span class="m-value text-blue-600 font-semibold">{{ invoice()?.clientCompany || 'ABC Pvt Ltd' }}</span>
+        <span class="m-sub">{{ invoice()?.projectTitle || 'Website Development' }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="m-label">Invoice Date</span>
+        <span class="m-value">{{ invoice()?.paymentDate || '02 Oct 2026' }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="m-label">Due Date</span>
+        <span class="m-value">{{ invoice()?.dueDate || '05 Oct 2026' }}</span>
+      </div>
+    </div>
+
+    <!-- Line Items Table -->
+    <div class="table-responsive">
+      <table class="inv-items-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Description</th>
+            <th class="text-right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-slate-400">1</td>
+            <td class="font-medium text-slate-900">{{ invoice()?.notes || 'Advance Payment' }}</td>
+            <td class="text-right font-semibold text-slate-900">{{ (invoice()?.amount || 25000) | currencyInr }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Bottom Totals Section -->
+    <div class="inv-bottom-totals">
+      <div class="totals-box">
+        <div class="total-row">
+          <span>Subtotal</span>
+          <span>{{ (invoice()?.amount || 25000) | currencyInr }}</span>
+        </div>
+        <div class="total-row grand-total">
+          <span>Total</span>
+          <span class="grand-val text-emerald-600">{{ (invoice()?.amount || 25000) | currencyInr }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PrimeNG Dialog: Simulated Payment Modal -->
+  <p-dialog
+    header="Complete Invoice Payment"
+    [visible]="showPaymentModal()"
+    (visibleChange)="showPaymentModal.set($event)"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '92vw', maxWidth: '540px' }"
+  >
+    <div class="modal-body">
+      <div class="amount-banner">
+        <span class="lbl">Amount Payable</span>
+        <span class="val">{{ invoice()?.amount | currencyInr }}</span>
+        <span class="sub">Invoice: {{ invoice()?.invoiceNumber }} • {{ invoice()?.projectTitle }}</span>
+      </div>
+
+      <div class="payment-method-selector">
+        <label class="section-title">Select Payment Mode</label>
+        <div class="method-cards-grid">
+          <button
+            type="button"
+            class="method-btn"
+            [class.selected]="selectedMethod() === 'UPI'"
+            (click)="selectedMethod.set('UPI')"
+          >
+            <i class="pi pi-qrcode"></i>
+            <strong>Instant UPI / QR</strong>
+            <span>Google Pay, PhonePe, Paytm</span>
+          </button>
+
+          <button
+            type="button"
+            class="method-btn"
+            [class.selected]="selectedMethod() === 'Bank Transfer'"
+            (click)="selectedMethod.set('Bank Transfer')"
+          >
+            <i class="pi pi-building"></i>
+            <strong>NEFT / IMPS</strong>
+            <span>Direct Bank Transfer</span>
+          </button>
+
+          <button
+            type="button"
+            class="method-btn"
+            [class.selected]="selectedMethod() === 'Stripe'"
+            (click)="selectedMethod.set('Stripe')"
+          >
+            <i class="pi pi-credit-card"></i>
+            <strong>Debit / Credit Card</strong>
+            <span>Visa, Mastercard, RuPay</span>
+          </button>
+        </div>
+      </div>
+
+      @if (selectedMethod() === 'UPI') {
+        <div class="upi-box">
+          <div class="qr-mock">
+            <i class="pi pi-qrcode qr-icon"></i>
+            <span>Scan with any UPI App</span>
+          </div>
+          <div class="upi-id-wrap">
+            <span class="lbl">UPI ID</span>
+            <span class="val">prem@okaxis</span>
+          </div>
+        </div>
+      }
+
+      <div class="modal-footer-btns">
+        <p-button label="Cancel" severity="secondary" [outlined]="true" (onClick)="showPaymentModal.set(false)" />
+        <p-button
+          [label]="'Confirm & Pay ' + ((invoice()?.amount || 0) | currencyInr)"
+          icon="pi pi-check-circle"
+          severity="success"
+          [loading]="isProcessing()"
+          (onClick)="confirmPayment(); showPaymentModal.set(false)"
+        />
+      </div>
+    </div>
+  </p-dialog>
+</div>

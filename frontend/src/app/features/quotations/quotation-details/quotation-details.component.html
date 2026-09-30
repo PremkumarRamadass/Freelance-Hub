@@ -1,0 +1,95 @@
+<div class="quote-details-container">
+  <!-- Top Header with Actions -->
+  <div class="details-top-header">
+    <div class="title-with-badge">
+      <h2>{{ quote()?.quotationNumber || 'Quotation #Q-001' }}</h2>
+      <p-tag
+        [value]="quote()?.status || 'Sent'"
+        [severity]="quote()?.status === 'Accepted' ? 'success' : (quote()?.status === 'Sent' ? 'info' : (quote()?.status === 'Rejected' ? 'danger' : 'secondary'))"
+        [rounded]="true"
+      />
+    </div>
+    <div class="quote-header-actions">
+      @if (authService.isClient()) {
+        <p-button label="Request Changes" icon="pi pi-comment" severity="secondary" [outlined]="true" (onClick)="requestRevision()" />
+        <p-button label="Download PDF" icon="pi pi-download" severity="secondary" [outlined]="true" (onClick)="printQuote()" />
+        <p-button label="Approve Quotation" icon="pi pi-check-circle" severity="success" (onClick)="approveQuote()" />
+      } @else {
+        <p-button label="Edit" icon="pi pi-pencil" severity="secondary" [outlined]="true" />
+        <p-button label="Download PDF" icon="pi pi-download" severity="secondary" [outlined]="true" (onClick)="printQuote()" />
+        <p-button label="Send" icon="pi pi-send" (onClick)="sendQuote()" />
+      }
+    </div>
+  </div>
+
+  @if (feedbackMessage()) {
+    <div class="approval-alert">
+      <i class="pi pi-info-circle"></i>
+      <span>{{ feedbackMessage() }}</span>
+    </div>
+  }
+
+  <!-- Document Card -->
+  <div class="card quote-paper-card" id="printable-quote">
+    <!-- Meta Info Box -->
+    <div class="quote-meta-row">
+      <div class="meta-item">
+        <span class="m-label">Client</span>
+        <span class="m-value text-blue-600 font-semibold">{{ quote()?.clientCompany || 'ABC Pvt Ltd' }}</span>
+        <span class="m-sub">{{ quote()?.projectTitle || 'Website Development' }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="m-label">Date</span>
+        <span class="m-value">{{ quote()?.issueDate || '25 Sep 2026' }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="m-label">Valid Until</span>
+        <span class="m-value">{{ quote()?.validUntil || '25 Oct 2026' }}</span>
+      </div>
+    </div>
+
+    <!-- Line Items Table -->
+    <div class="table-responsive">
+      <table class="quote-items-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Description</th>
+            <th class="text-center">Qty</th>
+            <th class="text-right">Rate</th>
+            <th class="text-right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of quote()?.items || []; track item.id; let idx = $index) {
+            <tr>
+              <td class="text-slate-400">{{ idx + 1 }}</td>
+              <td class="font-medium text-slate-900">{{ item.description }}</td>
+              <td class="text-center text-slate-700">{{ item.quantity }}</td>
+              <td class="text-right text-slate-700">{{ item.rate | currencyInr }}</td>
+              <td class="text-right font-semibold text-slate-900">{{ item.amount | currencyInr }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Bottom Totals Section -->
+    <div class="quote-bottom-totals">
+      <div class="totals-box">
+        <div class="total-row">
+          <span>Subtotal</span>
+          <span>{{ (quote()?.subtotal || 35000) | currencyInr }}</span>
+        </div>
+        <div class="total-row">
+          <span>GST (18%)</span>
+          <span>{{ (quote()?.taxAmount || 6300) | currencyInr }}</span>
+        </div>
+        <div class="total-row grand-total">
+          <span>Total</span>
+          <span class="grand-val">{{ (quote()?.total || 41300) | currencyInr }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

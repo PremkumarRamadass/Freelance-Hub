@@ -1,0 +1,170 @@
+<div class="projects-container">
+  <!-- Header -->
+  <div class="page-top-header">
+    <div>
+      <h2>Projects</h2>
+      <p class="subtitle">
+        {{ authService.isClient() ? 'Track development milestones, deliverables, and timelines for your contracts.' : 'Manage your projects and track progress.' }}
+      </p>
+    </div>
+    <div class="header-actions-row">
+      <div class="search-input-box">
+        <i class="pi pi-search"></i>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Search projects..."
+        />
+      </div>
+
+      <select class="status-dropdown" [(ngModel)]="selectedStatus">
+        <option value="All">All Status</option>
+        <option value="Active">Active</option>
+        <option value="On Track">On Track</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Completed">Completed</option>
+        <option value="At Risk">At Risk</option>
+      </select>
+
+      @if (!authService.isClient()) {
+        <button type="button" class="btn btn-primary" (click)="openAddModal()">
+          <i class="pi pi-plus"></i> Add Project
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Projects Table Card -->
+  <div class="card table-card">
+    <div class="table-responsive">
+      <table class="projects-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Project Name</th>
+            <th>Client</th>
+            <th>Start Date</th>
+            <th>Deadline</th>
+            <th>Progress</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of filteredProjects(); track p.id; let idx = $index) {
+            <tr>
+              <td class="text-slate-400">{{ idx + 1 }}</td>
+              <td>
+                <a [routerLink]="['/projects', p.id]" class="proj-title-link">
+                  {{ p.title }}
+                </a>
+              </td>
+              <td class="text-slate-700">{{ p.clientCompany }}</td>
+              <td class="text-slate-500">{{ p.startDate }}</td>
+              <td class="text-slate-500">{{ p.deadline }}</td>
+              <td class="progress-cell">
+                <div class="progress-wrap-p">
+                  <p-progressbar [value]="p.progress" [showValue]="false" [style]="{ height: '6px' }" />
+                  <span class="progress-val">{{ p.progress }}%</span>
+                </div>
+              </td>
+              <td>
+                <p-tag
+                  [value]="p.status"
+                  [severity]="p.status === 'Completed' ? 'success' : (p.status === 'In Progress' ? 'info' : (p.status === 'On Hold' ? 'danger' : 'warn'))"
+                  [rounded]="true"
+                />
+              </td>
+              <td class="text-right">
+                <div class="table-actions">
+                  <a [routerLink]="['/projects', p.id]" class="icon-btn" title="View Details">
+                    <i class="pi pi-eye"></i>
+                  </a>
+                  @if (!authService.isClient()) {
+                    <button type="button" class="icon-btn" (click)="editProject(p)" title="Edit">
+                      <i class="pi pi-pencil"></i>
+                    </button>
+                    <button type="button" class="icon-btn text-red-500" (click)="deleteProject(p.id, p.title)" title="Delete">
+                      <i class="pi pi-trash"></i>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer / Pagination -->
+    <div class="table-footer">
+      <span class="pagination-info">Showing 1 to {{ filteredProjects().length }} of 10 projects</span>
+      <div class="pagination-btns">
+        <button type="button" class="page-nav-btn"><i class="pi pi-chevron-left"></i></button>
+        <button type="button" class="page-num-btn active">1</button>
+        <button type="button" class="page-num-btn">2</button>
+        <button type="button" class="page-nav-btn"><i class="pi pi-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PrimeNG Add Project Dialog -->
+  <p-dialog
+    header="Create New Project"
+    [visible]="showModal()"
+    (visibleChange)="showModal.set($event)"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '92vw', maxWidth: '640px' }"
+  >
+    <form [formGroup]="projectForm" (ngSubmit)="saveProject()" class="modal-form-content">
+      <div class="form-group">
+        <label>Project Title *</label>
+        <input pInputText type="text" formControlName="title" placeholder="e.g. Website Development" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Client *</label>
+          <select formControlName="clientId">
+            <option value="" disabled>Select Client</option>
+            @for (c of clientService.clients(); track c.id) {
+              <option [value]="c.id">{{ c.company }} ({{ c.name }})</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Budget (INR) *</label>
+          <input pInputText type="number" formControlName="budget" placeholder="75000" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Start Date</label>
+          <input pInputText type="date" formControlName="startDate" />
+        </div>
+        <div class="form-group">
+          <label>Deadline *</label>
+          <input pInputText type="date" formControlName="deadline" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Technologies / Tags</label>
+        <input pInputText type="text" formControlName="tags" placeholder="Angular, Node.js, MongoDB, Tailwind CSS" />
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea formControlName="description" rows="3" placeholder="Full website development with modern UI/UX and CMS integration."></textarea>
+      </div>
+
+      <div class="modal-footer-btns">
+        <p-button label="Cancel" severity="secondary" [outlined]="true" (onClick)="closeModal()" />
+        <p-button type="submit" label="Create Project" icon="pi pi-check" [disabled]="projectForm.invalid" />
+      </div>
+    </form>
+  </p-dialog>
+</div>

@@ -1,0 +1,97 @@
+.notifications-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h2 { margin: 0; font-size: 1.5rem; font-weight: 700; color: #111827; }
+  .subtitle { margin: 0.2rem 0 0; font-size: 0.85rem; color: #6b7280; }
+}
+
+.btn {
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  &.btn-outline {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    &:hover { background: #f9fafb; }
+  }
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.notif-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.1rem;
+  border-bottom: 1px solid #f3f4f6;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: #f9fafb; }
+  &.unread { background: #f0f9ff; }
+}
+
+.notif-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+
+  &.deadline { background: #fffbeb; color: #d97706; }
+  &.payment { background: #ecfdf5; color: #059669; }
+  &.client { background: #eff6ff; color: #2563eb; }
+}
+
+.notif-body {
+  flex: 1;
+}
+
+.notif-title-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.notif-desc {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2563eb;
+  align-self: center;
+}

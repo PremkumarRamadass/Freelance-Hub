@@ -1,0 +1,131 @@
+<div class="clients-container">
+  <!-- Header -->
+  <div class="page-top-header">
+    <div>
+      <h2>Clients</h2>
+      <p class="subtitle">Manage your clients and their details.</p>
+    </div>
+    <div class="header-actions-row">
+      <div class="search-input-box">
+        <i class="pi pi-search"></i>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Search clients..."
+        />
+      </div>
+      <button type="button" class="btn-filter-icon" title="Filter">
+        <i class="pi pi-filter"></i>
+      </button>
+      <button type="button" class="btn btn-primary" (click)="openAddModal()">
+        <i class="pi pi-plus"></i> Add Client
+      </button>
+    </div>
+  </div>
+
+  <!-- Clients Table Card -->
+  <div class="card table-card">
+    <div class="table-responsive">
+      <table class="clients-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Company</th>
+            <th>Email</th>
+            <th>Projects</th>
+            <th>Total Amount</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (client of filteredClients(); track client.id; let idx = $index) {
+            <tr>
+              <td class="text-slate-400">{{ idx + 1 }}</td>
+              <td class="font-semibold text-slate-900">{{ client.name }}</td>
+              <td class="text-slate-700">{{ client.company }}</td>
+              <td class="text-slate-500">{{ client.email }}</td>
+              <td class="text-slate-700">{{ client.projectsCount }}</td>
+              <td class="font-semibold text-slate-900">{{ client.totalBilled | currencyInr }}</td>
+              <td>
+                <p-tag [value]="client.status" [severity]="client.status === 'Active' ? 'success' : 'secondary'" [rounded]="true" />
+              </td>
+              <td class="text-right">
+                <div class="table-actions">
+                  <button type="button" class="icon-btn" (click)="openEditModal(client)" title="Edit">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button type="button" class="icon-btn text-red-500" (click)="deleteClient(client.id, client.name)" title="Delete">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer / Pagination -->
+    <div class="table-footer">
+      <span class="pagination-info">Showing 1 to {{ filteredClients().length }} of 12 clients</span>
+      <div class="pagination-btns">
+        <button type="button" class="page-nav-btn"><i class="pi pi-chevron-left"></i></button>
+        <button type="button" class="page-num-btn active">1</button>
+        <button type="button" class="page-num-btn">2</button>
+        <button type="button" class="page-nav-btn"><i class="pi pi-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PrimeNG Add / Edit Client Dialog -->
+  <p-dialog
+    [header]="isEditing() ? 'Edit Client' : 'Add New Client'"
+    [visible]="showModal()"
+    (visibleChange)="showModal.set($event)"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '92vw', maxWidth: '580px' }"
+  >
+    <form [formGroup]="clientForm" (ngSubmit)="saveClient()" class="modal-form-content">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Name *</label>
+          <input pInputText type="text" formControlName="name" placeholder="Enter client name" />
+        </div>
+        <div class="form-group">
+          <label>Company</label>
+          <input pInputText type="text" formControlName="company" placeholder="Enter company name" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email *</label>
+          <input pInputText type="email" formControlName="email" placeholder="client@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input pInputText type="text" formControlName="phone" placeholder="Enter phone number" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Address</label>
+        <input pInputText type="text" formControlName="country" placeholder="Enter address" />
+      </div>
+
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea formControlName="notes" rows="3" placeholder="Additional notes..."></textarea>
+      </div>
+
+      <div class="modal-footer-btns">
+        <p-button label="Cancel" severity="secondary" [outlined]="true" (onClick)="closeModal()" />
+        <p-button type="submit" [label]="isEditing() ? 'Update Client' : 'Save Client'" icon="pi pi-check" [disabled]="clientForm.invalid" />
+      </div>
+    </form>
+  </p-dialog>
+</div>

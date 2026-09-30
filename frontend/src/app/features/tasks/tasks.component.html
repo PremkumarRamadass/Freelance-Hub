@@ -1,0 +1,168 @@
+<div class="tasks-container">
+  <!-- Breadcrumbs & Header -->
+  <div class="breadcrumb">
+    <a routerLink="/projects">Projects</a>
+    <i class="pi pi-angle-right"></i>
+    <a routerLink="/projects/prj_1">Website Development</a>
+    <i class="pi pi-angle-right"></i>
+    <span>Tasks</span>
+  </div>
+
+  <div class="page-top-header">
+    <div>
+      <h2>Tasks</h2>
+      <p class="subtitle">
+        {{ authService.isClient() ? 'Track development deliverables and sprint progress in real-time.' : 'Manage and track project tasks.' }}
+      </p>
+    </div>
+    @if (!authService.isClient()) {
+      <button type="button" class="btn btn-primary" (click)="openAddTaskModal()">
+        <i class="pi pi-plus"></i> Add Task
+      </button>
+    }
+  </div>
+
+  <!-- Tasks Table Card -->
+  <div class="card table-card">
+    <div class="table-responsive">
+      <table class="tasks-table">
+        <thead>
+          <tr>
+            <th class="w-10"></th>
+            <th>#</th>
+            <th>Task Name</th>
+            <th>Assignee</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (task of taskService.tasks(); track task.id; let idx = $index) {
+            <tr>
+              <td>
+                <input
+                  type="checkbox"
+                  [checked]="task.status === 'Completed'"
+                  (change)="toggleStatus(task)"
+                  [disabled]="authService.isClient()"
+                />
+              </td>
+              <td class="text-slate-400">{{ idx + 1 }}</td>
+              <td>
+                <span class="task-title-text" [class.done]="task.status === 'Completed'">
+                  {{ task.title }}
+                </span>
+              </td>
+              <td>
+                <div class="assignee-cell">
+                  <img
+                    [src]="task.assigneeAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80'"
+                    alt="Assignee"
+                    class="avatar-xs"
+                  />
+                  <span>{{ task.assignee }}</span>
+                </div>
+              </td>
+              <td class="text-slate-500">{{ task.dueDate }}</td>
+              <td>
+                <p-tag
+                  [value]="task.status"
+                  [severity]="task.status === 'Completed' ? 'success' : (task.status === 'In Progress' ? 'info' : 'warn')"
+                  [rounded]="true"
+                />
+              </td>
+              <td class="text-right">
+                <div class="table-actions">
+                  @if (!authService.isClient()) {
+                    <button type="button" class="icon-btn" (click)="editTask(task)" title="Edit">
+                      <i class="pi pi-pencil"></i>
+                    </button>
+                    <button type="button" class="icon-btn text-red-500" (click)="deleteTask(task.id)" title="Delete">
+                      <i class="pi pi-trash"></i>
+                    </button>
+                  } @else {
+                    <span class="text-xs text-slate-400 font-medium">Sprint Task</span>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer / Pagination -->
+    <div class="table-footer">
+      <span class="pagination-info">Showing 1 to {{ taskService.tasks().length }} of 5 tasks</span>
+      <div class="pagination-btns">
+        <button type="button" class="page-nav-btn"><i class="pi pi-chevron-left"></i></button>
+        <button type="button" class="page-num-btn active">1</button>
+        <button type="button" class="page-num-btn">2</button>
+        <button type="button" class="page-nav-btn"><i class="pi pi-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PrimeNG Add / Edit Task Dialog -->
+  <p-dialog
+    [header]="isEditing() ? 'Edit Task' : 'Add New Task'"
+    [visible]="showModal()"
+    (visibleChange)="showModal.set($event)"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '92vw', maxWidth: '580px' }"
+  >
+    <form [formGroup]="taskForm" (ngSubmit)="saveTask()" class="modal-form-content">
+      <div class="form-group">
+        <label>Task Name *</label>
+        <input pInputText type="text" formControlName="title" placeholder="e.g. UI Design & Wireframes" />
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea formControlName="description" rows="2" placeholder="Task requirements and scope..."></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Assignee</label>
+          <select formControlName="assignee">
+            <option value="Premkumar">Premkumar</option>
+            <option value="Keerthana">Keerthana</option>
+            <option value="Suresh">Suresh</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input pInputText type="date" formControlName="dueDate" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Priority</label>
+          <select formControlName="priority">
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select formControlName="status">
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-footer-btns">
+        <p-button label="Cancel" severity="secondary" [outlined]="true" (onClick)="closeModal()" />
+        <p-button type="submit" [label]="isEditing() ? 'Update Task' : 'Save Task'" icon="pi pi-check" [disabled]="taskForm.invalid" />
+      </div>
+    </form>
+  </p-dialog>
+</div>

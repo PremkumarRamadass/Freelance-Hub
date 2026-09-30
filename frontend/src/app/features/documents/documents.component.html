@@ -1,0 +1,49 @@
+<div class="documents-container">
+  <div class="page-top-header">
+    <div>
+      <h2>Documents & Contracts</h2>
+      <p class="subtitle">Securely store project briefs, NDAs, and signed specifications.</p>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="uploadFile()">
+      <i class="pi pi-upload"></i> Upload Document
+    </button>
+  </div>
+
+  <div class="card table-card">
+    <div class="table-responsive">
+      <table class="docs-table">
+        <thead>
+          <tr>
+            <th>Document Name</th>
+            <th>Associated Project</th>
+            <th>Type</th>
+            <th>Size</th>
+            <th>Uploaded Date</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (doc of documents(); track doc.id) {
+            <tr>
+              <td>
+                <div class="doc-name-cell">
+                  <i [class]="'pi ' + doc.icon + ' text-blue-500'"></i>
+                  <span class="font-semibold text-slate-900">{{ doc.name }}</span>
+                </div>
+              </td>
+              <td class="text-slate-700">{{ doc.project }}</td>
+              <td><span class="type-pill">{{ doc.type }}</span></td>
+              <td class="text-slate-500">{{ doc.size }}</td>
+              <td class="text-slate-500">{{ doc.date }}</td>
+              <td class="text-right">
+                <button type="button" class="icon-btn" title="Download">
+                  <i class="pi pi-download"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,24 @@
+<div class="stat-card" [class]="'variant-' + variant()">
+  <div class="stat-main">
+    <div class="stat-meta">
+      <span class="stat-title">{{ title() }}</span>
+      <h3 class="stat-value">{{ value() }}</h3>
+      @if (subtitle() || trend()) {
+        <div class="stat-trend-row">
+          @if (trend()) {
+            <span class="trend-badge" [class.positive]="trendPositive()" [class.negative]="!trendPositive()">
+              <i [class]="trendPositive() ? 'pi pi-arrow-up-right' : 'pi pi-arrow-down-right'"></i>
+              {{ trend() }}
+            </span>
+          }
+          @if (subtitle()) {
+            <span class="trend-sub">{{ subtitle() }}</span>
+          }
+        </div>
+      }
+    </div>
+    <div class="stat-icon-box" [style.background]="iconBg()" [style.color]="iconColor()">
+      <i [class]="'pi ' + icon()"></i>
+    </div>
+  </div>
+</div>
