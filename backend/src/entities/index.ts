@@ -7,3 +7,4 @@ export * from './invoice.entity.js';
 export * from './payment.entity.js';
 export * from './document.entity.js';
 export * from './notification.entity.js';
+export * from './proposal.entity.js';

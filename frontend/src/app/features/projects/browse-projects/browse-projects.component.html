@@ -1,0 +1,279 @@
+<div class="browse-projects-container">
+  <!-- Top Header -->
+  <div class="page-top-header">
+    <div>
+      <div class="header-badge-row">
+        <h2>Browse & Find Projects</h2>
+        <span class="marketplace-badge"><i class="pi pi-bolt"></i> Live Marketplace</span>
+      </div>
+      <p class="subtitle">
+        Explore published contracts from verified clients, submit competitive proposals, and kick off sprints.
+      </p>
+    </div>
+
+    @if (authService.isClient()) {
+      <div class="client-switch-banner">
+        <i class="pi pi-info-circle"></i>
+        <span>You are logged in as a Client. Visit <a routerLink="/projects">My Projects</a> to create or manage your postings.</span>
+      </div>
+    }
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div class="filter-panel card">
+    <div class="filter-primary-row">
+      <div class="search-input-box">
+        <i class="pi pi-search"></i>
+        <input
+          type="text"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          placeholder="Search by title, description, client, or required skills..."
+        />
+      </div>
+
+      <div class="filter-controls-group">
+        <select
+          class="custom-select"
+          [ngModel]="selectedCategory()"
+          (ngModelChange)="selectedCategory.set($event)"
+          title="Filter by Category"
+        >
+          @for (cat of categories; track cat) {
+            <option [value]="cat">{{ cat === 'All' ? 'All Categories' : cat }}</option>
+          }
+        </select>
+
+        <select
+          class="custom-select"
+          [ngModel]="selectedBudgetType()"
+          (ngModelChange)="selectedBudgetType.set($event)"
+          title="Filter by Budget Type"
+        >
+          <option value="All">All Budget Types</option>
+          <option value="Fixed Price">Fixed Price</option>
+          <option value="Hourly">Hourly</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Skills Pill Filter Strip -->
+    <div class="skills-filter-strip">
+      <span class="strip-label"><i class="pi pi-filter"></i> Top Skills:</span>
+      <div class="skill-pills-wrap">
+        @for (s of popularSkills; track s) {
+          <button
+            type="button"
+            class="skill-filter-pill"
+            [class.active]="selectedSkill() === s"
+            (click)="selectedSkill.set(s)"
+          >
+            {{ s }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Summary Bar -->
+  <div class="results-meta-bar">
+    <span class="results-count">
+      Showing <strong>{{ publishedProjects().length }}</strong> published project{{ publishedProjects().length === 1 ? '' : 's' }}
+    </span>
+  </div>
+
+  <!-- Projects Marketplace Grid -->
+  @if (publishedProjects().length === 0) {
+    <div class="empty-state-card card">
+      <div class="empty-icon"><i class="pi pi-inbox"></i></div>
+      <h3>No matching published projects found</h3>
+      <p>Try adjusting your search query, clearing filters, or check back soon as new clients post projects.</p>
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="searchQuery.set(''); selectedCategory.set('All'); selectedSkill.set('All'); selectedBudgetType.set('All')"
+      >
+        <i class="pi pi-refresh"></i> Reset All Filters
+      </button>
+    </div>
+  } @else {
+    <div class="projects-grid">
+      @for (p of publishedProjects(); track p.id) {
+        <div class="project-marketplace-card card">
+          <!-- Card Header -->
+          <div class="card-top">
+            <div class="badge-group">
+              <span class="category-pill">{{ p.category || 'Web App' }}</span>
+              <p-tag
+                [value]="p.priority"
+                [severity]="p.priority === 'Urgent' ? 'danger' : (p.priority === 'High' ? 'warn' : 'info')"
+                [rounded]="true"
+              />
+            </div>
+            <span class="posted-time"><i class="pi pi-calendar"></i> Deadline: {{ p.deadline }}</span>
+          </div>
+
+          <!-- Title & Client -->
+          <h3 class="proj-card-title">
+            <a [routerLink]="['/projects', p.id]">{{ p.title }}</a>
+          </h3>
+
+          <div class="client-meta-row">
+            <span class="client-company">
+              <i class="pi pi-building"></i> {{ p.clientCompany || 'Verified Enterprise' }}
+            </span>
+            <span class="verified-chip"><i class="pi pi-check-circle"></i> Verified Client</span>
+          </div>
+
+          <!-- Description -->
+          <p class="proj-card-desc">
+            {{ p.description || 'Full-stack software engineering deliverable with modern architecture and sprint milestones.' }}
+          </p>
+
+          <!-- Required Skills Chips -->
+          @if (p.requiredSkills && p.requiredSkills.length > 0) {
+            <div class="skills-tags-wrap">
+              @for (skill of p.requiredSkills; track skill) {
+                <span class="skill-tag">{{ skill }}</span>
+              }
+            </div>
+          }
+
+          <!-- Card Footer Metrics & Actions -->
+          <div class="card-footer-metrics">
+            <div class="budget-col">
+              <span class="budget-type-label">{{ p.budgetType || 'Fixed Price' }}</span>
+              <span class="budget-amount">{{ p.budget | currencyInr }}</span>
+            </div>
+
+            <div class="proposals-stat">
+              <i class="pi pi-file-edit"></i>
+              <span>{{ p.proposalsCount || 0 }} Proposal{{ p.proposalsCount === 1 ? '' : 's' }}</span>
+            </div>
+
+            <div class="actions-col">
+              @if (hasSubmittedProposal(p.id)) {
+                <button type="button" class="btn btn-submitted" disabled>
+                  <i class="pi pi-check"></i> Proposal Sent
+                </button>
+              } @else if (authService.isClient()) {
+                <a [routerLink]="['/projects', p.id]" class="btn btn-outline btn-sm">
+                  View Details
+                </a>
+              } @else {
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  (click)="openProposalModal(p)"
+                >
+                  <i class="pi pi-send"></i> Submit Proposal
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Submit Proposal PrimeNG Dialog -->
+  <p-dialog
+    header="Submit Project Quotation & Proposal"
+    [visible]="showProposalModal()"
+    (visibleChange)="showProposalModal.set($event)"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '92vw', maxWidth: '640px' }"
+  >
+    @if (selectedProject()) {
+      <div class="dialog-project-summary">
+        <span class="summary-label">Target Project:</span>
+        <h4 class="summary-title">{{ selectedProject()?.title }}</h4>
+        <div class="summary-details">
+          <span>Client: <strong>{{ selectedProject()?.clientCompany }}</strong></span>
+          <span>Client Budget: <strong>{{ selectedProject()?.budget | currencyInr }} ({{ selectedProject()?.budgetType || 'Fixed' }})</strong></span>
+          <span>Deadline: <strong>{{ selectedProject()?.deadline }}</strong></span>
+        </div>
+      </div>
+
+      <form [formGroup]="proposalForm" (ngSubmit)="submitProposal()" class="proposal-form-content">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Proposed Price (INR) *</label>
+            <input
+              pInputText
+              type="number"
+              formControlName="proposedPrice"
+              placeholder="e.g. 60000"
+            />
+            @if (proposalForm.get('proposedPrice')?.invalid && proposalForm.get('proposedPrice')?.touched) {
+              <small class="error-msg">Please enter a valid price (min ₹100).</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label>Estimated Delivery Time *</label>
+            <input
+              pInputText
+              type="text"
+              formControlName="estimatedDelivery"
+              placeholder="e.g. 15 Days, 3 Weeks"
+            />
+            @if (proposalForm.get('estimatedDelivery')?.invalid && proposalForm.get('estimatedDelivery')?.touched) {
+              <small class="error-msg">Delivery timeframe is required.</small>
+            }
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Cover Letter / Detailed Pitch *</label>
+          <textarea
+            formControlName="coverLetter"
+            rows="5"
+            placeholder="Explain why you are the best fit, your technical approach, architecture decisions, and milestones..."
+          ></textarea>
+          @if (proposalForm.get('coverLetter')?.invalid && proposalForm.get('coverLetter')?.touched) {
+            <small class="error-msg">Cover letter must be at least 20 characters.</small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Relevant Experience & Track Record</label>
+          <input
+            pInputText
+            type="text"
+            formControlName="relevantExperience"
+            placeholder="e.g. 5+ yrs Angular & NestJS, 15+ Enterprise SaaS apps delivered"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Portfolio Link / Attachments (Optional)</label>
+          <input
+            pInputText
+            type="text"
+            formControlName="attachments"
+            placeholder="https://github.com/myportfolio or document link"
+          />
+        </div>
+
+        <div class="modal-footer-btns">
+          <p-button
+            label="Cancel"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="closeProposalModal()"
+          />
+          <p-button
+            type="submit"
+            label="Submit Proposal"
+            icon="pi pi-send"
+            [loading]="isSubmitting()"
+            [disabled]="proposalForm.invalid || isSubmitting()"
+          />
+        </div>
+      </form>
+    }
+  </p-dialog>
+</div>

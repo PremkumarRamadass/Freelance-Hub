@@ -11,6 +11,7 @@ import {
   Payment,
   Document,
   Notification,
+  Proposal,
 } from '../entities/index.js';
 import { DatabaseSeedService } from './database-seed.service.js';
 
@@ -58,6 +59,7 @@ import { DatabaseSeedService } from './database-seed.service.js';
       Payment,
       Document,
       Notification,
+      Proposal,
     ]),
   ],
   providers: [DatabaseSeedService],

@@ -37,6 +37,7 @@ export class SidebarComponent {
 
     return [
       { label: 'Dashboard', icon: 'pi-th-large', route: '/dashboard' },
+      { label: 'Browse Projects', icon: 'pi-compass', route: '/browse-projects' },
       { label: 'Clients', icon: 'pi-users', route: '/clients' },
       { label: 'Projects', icon: 'pi-folder', route: '/projects' },
       { label: 'Tasks', icon: 'pi-check-square', route: '/tasks' },

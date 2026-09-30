@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { MessageService } from 'primeng/api';
+import { of } from 'rxjs';
 import { ProjectDetailsComponent } from './project-details.component';
 import { ProjectService } from '../../../core/services/project.service';
 import { Project } from '../../../core/models/project.model';
@@ -24,6 +26,8 @@ describe('ProjectDetailsComponent', () => {
     status: 'In Progress',
     priority: 'High',
     progress: 65,
+    requiredSkills: ['Angular', 'NestJS'],
+    proposalsCount: 1,
     tags: ['Angular', 'NestJS'],
     tasks: [{ id: 'task_1', title: 'Setup Repo', completed: true, priority: 'High' }],
     milestones: [],
@@ -36,7 +40,8 @@ describe('ProjectDetailsComponent', () => {
       imports: [ProjectDetailsComponent],
       providers: [
         provideHttpClient(),
-        provideRouter([])
+        provideRouter([]),
+        MessageService
       ]
     }).compileComponents();
 
@@ -69,5 +74,29 @@ describe('ProjectDetailsComponent', () => {
     const toggleSpy = vi.spyOn(projectService, 'toggleTaskCompletion');
     component.toggleTask('task_1');
     expect(toggleSpy).toHaveBeenCalledWith('prj_1', 'task_1');
+  });
+
+  it('should toggle proposal modal visibility', () => {
+    component.openProposalModal();
+    expect(component.showProposalModal()).toBe(true);
+
+    component.closeProposalModal();
+    expect(component.showProposalModal()).toBe(false);
+  });
+
+  it('should accept proposal via projectService.acceptProposal', () => {
+    const mockProposal: any = { id: 'prop_123', freelancerName: 'Alice', proposedPrice: 10000 };
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const acceptSpy = vi.spyOn(projectService, 'acceptProposal').mockReturnValue(of({} as any));
+    component.acceptProposal(mockProposal);
+    expect(acceptSpy).toHaveBeenCalledWith('prop_123', 'prj_1');
+  });
+
+  it('should reject proposal via projectService.rejectProposal', () => {
+    const mockProposal: any = { id: 'prop_123', freelancerName: 'Alice', proposedPrice: 10000 };
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const rejectSpy = vi.spyOn(projectService, 'rejectProposal').mockReturnValue(of({} as any));
+    component.rejectProposal(mockProposal);
+    expect(rejectSpy).toHaveBeenCalledWith('prop_123');
   });
 });

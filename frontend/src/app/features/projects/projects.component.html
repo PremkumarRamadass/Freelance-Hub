@@ -2,31 +2,57 @@
   <!-- Header -->
   <div class="page-top-header">
     <div>
-      <h2>Projects</h2>
+      <div class="title-with-pill">
+        <h2>{{ authService.isClient() ? 'My Projects' : 'Projects' }}</h2>
+        @if (authService.isClient()) {
+          <span class="client-badge"><i class="pi pi-building"></i> Client Workspace</span>
+        }
+      </div>
       <p class="subtitle">
-        {{ authService.isClient() ? 'Track development milestones, deliverables, and timelines for your contracts.' : 'Manage your projects and track progress.' }}
+        {{ authService.isClient()
+          ? 'Create new project briefs, review competitive freelancer proposals, assign contracts, and track milestones.'
+          : 'Manage your active client contracts, milestones, and task deliverables.'
+        }}
       </p>
     </div>
+
     <div class="header-actions-row">
       <div class="search-input-box">
         <i class="pi pi-search"></i>
         <input
           type="text"
-          [(ngModel)]="searchQuery"
-          placeholder="Search projects..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          placeholder="Search by title, skill, or status..."
         />
       </div>
 
-      <select class="status-dropdown" [(ngModel)]="selectedStatus">
-        <option value="All">All Status</option>
-        <option value="Active">Active</option>
-        <option value="On Track">On Track</option>
+      <select
+        class="status-dropdown"
+        [ngModel]="selectedStatus()"
+        (ngModelChange)="selectedStatus.set($event)"
+        title="Filter by status"
+      >
+        <option value="All">All Statuses</option>
+        <option value="Draft">Draft</option>
+        <option value="Published">Published</option>
+        <option value="Under Review">Under Review</option>
+        <option value="Assigned">Assigned</option>
         <option value="In Progress">In Progress</option>
         <option value="Completed">Completed</option>
-        <option value="At Risk">At Risk</option>
+        <option value="Cancelled">Cancelled</option>
+        <option value="Closed">Closed</option>
       </select>
 
-      @if (!authService.isClient()) {
+      @if (authService.isClient()) {
+        <button
+          type="button"
+          class="btn btn-primary btn-create"
+          (click)="openAddModal()"
+        >
+          <i class="pi pi-plus-circle"></i> Create New Project
+        </button>
+      } @else {
         <button type="button" class="btn btn-primary" (click)="openAddModal()">
           <i class="pi pi-plus"></i> Add Project
         </button>
@@ -41,130 +67,507 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>Project Name</th>
-            <th>Client</th>
-            <th>Start Date</th>
+            <th>Project Title</th>
+            <th>Category</th>
+            <th>Budget</th>
             <th>Deadline</th>
+            <th>Proposals</th>
             <th>Progress</th>
             <th>Status</th>
             <th class="text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
-          @for (p of filteredProjects(); track p.id; let idx = $index) {
+          @if (filteredProjects().length === 0) {
             <tr>
-              <td class="text-slate-400">{{ idx + 1 }}</td>
-              <td>
-                <a [routerLink]="['/projects', p.id]" class="proj-title-link">
-                  {{ p.title }}
-                </a>
-              </td>
-              <td class="text-slate-700">{{ p.clientCompany }}</td>
-              <td class="text-slate-500">{{ p.startDate }}</td>
-              <td class="text-slate-500">{{ p.deadline }}</td>
-              <td class="progress-cell">
-                <div class="progress-wrap-p">
-                  <p-progressbar [value]="p.progress" [showValue]="false" [style]="{ height: '6px' }" />
-                  <span class="progress-val">{{ p.progress }}%</span>
-                </div>
-              </td>
-              <td>
-                <p-tag
-                  [value]="p.status"
-                  [severity]="p.status === 'Completed' ? 'success' : (p.status === 'In Progress' ? 'info' : (p.status === 'On Hold' ? 'danger' : 'warn'))"
-                  [rounded]="true"
-                />
-              </td>
-              <td class="text-right">
-                <div class="table-actions">
-                  <a [routerLink]="['/projects', p.id]" class="icon-btn" title="View Details">
-                    <i class="pi pi-eye"></i>
-                  </a>
-                  @if (!authService.isClient()) {
-                    <button type="button" class="icon-btn" (click)="editProject(p)" title="Edit">
-                      <i class="pi pi-pencil"></i>
-                    </button>
-                    <button type="button" class="icon-btn text-red-500" (click)="deleteProject(p.id, p.title)" title="Delete">
-                      <i class="pi pi-trash"></i>
+              <td colspan="9" class="empty-table-cell">
+                <div class="empty-prompt">
+                  <i class="pi pi-folder-open text-2xl text-slate-400 mb-2"></i>
+                  <p class="font-medium text-slate-700">No projects found</p>
+                  @if (authService.isClient()) {
+                    <p class="text-sm text-slate-500 mb-3">You haven't posted any projects yet or none match your filter.</p>
+                    <button type="button" class="btn btn-primary btn-sm" (click)="openAddModal()">
+                      <i class="pi pi-plus"></i> Create Your First Project
                     </button>
                   }
                 </div>
               </td>
             </tr>
+          } @else {
+            @for (p of filteredProjects(); track p.id; let idx = $index) {
+              <tr>
+                <td class="text-slate-400 font-mono text-xs">{{ idx + 1 }}</td>
+                <td>
+                  <div class="title-cell">
+                    <a [routerLink]="['/projects', p.id]" class="proj-title-link">
+                      {{ p.title }}
+                    </a>
+                    @if (p.assignedFreelancerName) {
+                      <span class="assignee-tag">
+                        <i class="pi pi-user-check"></i> {{ p.assignedFreelancerName }}
+                      </span>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <span class="category-chip">{{ p.category || 'Web App' }}</span>
+                </td>
+                <td class="budget-cell">
+                  <strong>{{ p.budget | currencyInr }}</strong>
+                  <span class="budget-type-sub">{{ p.budgetType || 'Fixed' }}</span>
+                </td>
+                <td class="text-slate-500 text-sm">{{ p.deadline }}</td>
+                <td>
+                  @if (authService.isClient()) {
+                    <button
+                      type="button"
+                      class="proposals-badge-btn"
+                      [class.has-proposals]="p.proposalsCount > 0"
+                      (click)="openProposalsModal(p)"
+                      title="Review Proposals"
+                    >
+                      <i class="pi pi-file-edit"></i>
+                      <span>{{ p.proposalsCount || 0 }}</span>
+                    </button>
+                  } @else {
+                    <span class="text-slate-500 text-xs">{{ p.proposalsCount || 0 }}</span>
+                  }
+                </td>
+                <td class="progress-cell">
+                  <div class="progress-wrap-p">
+                    <p-progressbar [value]="p.progress" [showValue]="false" [style]="{ height: '6px' }" />
+                    <span class="progress-val">{{ p.progress }}%</span>
+                  </div>
+                </td>
+                <td>
+                  <p-tag
+                    [value]="p.status"
+                    [severity]="
+                      p.status === 'Completed'
+                        ? 'success'
+                        : p.status === 'Assigned' || p.status === 'In Progress'
+                          ? 'info'
+                          : p.status === 'Published'
+                            ? 'success'
+                            : p.status === 'Under Review'
+                              ? 'warn'
+                              : p.status === 'Cancelled'
+                                ? 'danger'
+                                : 'secondary'
+                    "
+                    [rounded]="true"
+                  />
+                </td>
+                <td class="text-right">
+                  <div class="table-actions">
+                    <a [routerLink]="['/projects', p.id]" class="icon-btn" title="View Details">
+                      <i class="pi pi-eye"></i>
+                    </a>
+
+                    <!-- Status-Aware Actions for Client -->
+                    @if (authService.isClient()) {
+                      <!-- Proposals button -->
+                      <button
+                        type="button"
+                        class="icon-btn"
+                        (click)="openProposalsModal(p)"
+                        title="Review Proposals"
+                      >
+                        <i class="pi pi-users"></i>
+                      </button>
+
+                      <!-- Edit if Draft or Published -->
+                      @if (p.status === 'Draft' || p.status === 'Published') {
+                        <button type="button" class="icon-btn" (click)="editProject(p)" title="Edit Project">
+                          <i class="pi pi-pencil"></i>
+                        </button>
+                      }
+
+                      <!-- Publish if Draft -->
+                      @if (p.status === 'Draft') {
+                        <button
+                          type="button"
+                          class="icon-btn text-blue-600"
+                          (click)="publishProject(p)"
+                          title="Publish to Marketplace"
+                        >
+                          <i class="pi pi-send"></i>
+                        </button>
+                      }
+
+                      <!-- Unpublish if Published and no accepted proposal -->
+                      @if (p.status === 'Published' && !p.assignedFreelancerId) {
+                        <button
+                          type="button"
+                          class="icon-btn text-amber-600"
+                          (click)="unpublishProject(p)"
+                          title="Revert to Draft"
+                        >
+                          <i class="pi pi-undo"></i>
+                        </button>
+                      }
+
+                      <!-- Cancel if not Completed or Closed -->
+                      @if (p.status !== 'Completed' && p.status !== 'Closed' && p.status !== 'Cancelled') {
+                        <button
+                          type="button"
+                          class="icon-btn text-rose-500"
+                          (click)="cancelProject(p)"
+                          title="Cancel Project"
+                        >
+                          <i class="pi pi-ban"></i>
+                        </button>
+                      }
+
+                      <!-- Close if Completed or Cancelled -->
+                      @if (p.status === 'Completed' || p.status === 'Cancelled') {
+                        <button
+                          type="button"
+                          class="icon-btn text-slate-500"
+                          (click)="closeProject(p)"
+                          title="Close / Archive Project"
+                        >
+                          <i class="pi pi-lock"></i>
+                        </button>
+                      }
+                    } @else {
+                      <button type="button" class="icon-btn" (click)="editProject(p)" title="Edit">
+                        <i class="pi pi-pencil"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="icon-btn text-red-500"
+                        (click)="deleteProject(p.id, p.title)"
+                        title="Delete"
+                      >
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
           }
         </tbody>
       </table>
     </div>
 
-    <!-- Table Footer / Pagination -->
+    <!-- Table Footer -->
     <div class="table-footer">
-      <span class="pagination-info">Showing 1 to {{ filteredProjects().length }} of 10 projects</span>
-      <div class="pagination-btns">
-        <button type="button" class="page-nav-btn"><i class="pi pi-chevron-left"></i></button>
-        <button type="button" class="page-num-btn active">1</button>
-        <button type="button" class="page-num-btn">2</button>
-        <button type="button" class="page-nav-btn"><i class="pi pi-chevron-right"></i></button>
-      </div>
+      <span class="pagination-info">Showing {{ filteredProjects().length }} total projects</span>
     </div>
   </div>
 
-  <!-- PrimeNG Add Project Dialog -->
+  <!-- PrimeNG Create / Edit Project Dialog -->
   <p-dialog
-    header="Create New Project"
+    [header]="isEditing() ? 'Edit Project Posting' : 'Create & Post New Project'"
     [visible]="showModal()"
     (visibleChange)="showModal.set($event)"
     [modal]="true"
     [draggable]="false"
     [resizable]="false"
-    [style]="{ width: '92vw', maxWidth: '640px' }"
+    [style]="{ width: '94vw', maxWidth: '720px' }"
   >
-    <form [formGroup]="projectForm" (ngSubmit)="saveProject()" class="modal-form-content">
+    <form [formGroup]="projectForm" class="modal-form-content">
+      <!-- Title -->
       <div class="form-group">
         <label>Project Title *</label>
-        <input pInputText type="text" formControlName="title" placeholder="e.g. Website Development" />
+        <input
+          pInputText
+          type="text"
+          formControlName="title"
+          placeholder="e.g. Next-Gen Enterprise E-Commerce Platform"
+        />
+        @if (projectForm.get('title')?.invalid && projectForm.get('title')?.touched) {
+          <small class="error-msg">Project title is required (min 4 characters).</small>
+        }
       </div>
 
+      <!-- Category & Budget Type -->
       <div class="form-row">
         <div class="form-group">
-          <label>Client *</label>
-          <select formControlName="clientId">
-            <option value="" disabled>Select Client</option>
-            @for (c of clientService.clients(); track c.id) {
-              <option [value]="c.id">{{ c.company }} ({{ c.name }})</option>
+          <label>Project Category</label>
+          <select formControlName="category">
+            @for (cat of categoryOptions; track cat) {
+              <option [value]="cat">{{ cat }}</option>
             }
           </select>
         </div>
+
         <div class="form-group">
-          <label>Budget (INR) *</label>
-          <input pInputText type="number" formControlName="budget" placeholder="75000" />
+          <label>Budget Type</label>
+          <div class="budget-type-toggle">
+            <label class="radio-label">
+              <input type="radio" value="Fixed Price" formControlName="budgetType" />
+              <span>Fixed Price</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" value="Hourly" formControlName="budgetType" />
+              <span>Hourly Rate</span>
+            </label>
+          </div>
         </div>
       </div>
 
+      <!-- Budget & Delivery Date -->
       <div class="form-row">
         <div class="form-group">
-          <label>Start Date</label>
-          <input pInputText type="date" formControlName="startDate" />
+          <label>Estimated Budget (INR) *</label>
+          <input
+            pInputText
+            type="number"
+            formControlName="budget"
+            placeholder="75000"
+          />
+          @if (projectForm.get('budget')?.invalid && projectForm.get('budget')?.touched) {
+            <small class="error-msg">Valid budget is required (min ₹1,000).</small>
+          }
         </div>
+
         <div class="form-group">
-          <label>Deadline *</label>
+          <label>Expected Delivery Date *</label>
           <input pInputText type="date" formControlName="deadline" />
+          @if (projectForm.get('deadline')?.invalid && projectForm.get('deadline')?.touched) {
+            <small class="error-msg">Expected delivery date is required.</small>
+          }
         </div>
       </div>
 
-      <div class="form-group">
-        <label>Technologies / Tags</label>
-        <input pInputText type="text" formControlName="tags" placeholder="Angular, Node.js, MongoDB, Tailwind CSS" />
+      <!-- Priority -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Project Priority</label>
+          <select formControlName="priority">
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+            <option value="Urgent">Urgent</option>
+          </select>
+        </div>
+
+        @if (!authService.isClient()) {
+          <div class="form-group">
+            <label>Client</label>
+            <select formControlName="clientId">
+              @for (c of clientService.clients(); track c.id) {
+                <option [value]="c.id">{{ c.company }} ({{ c.name }})</option>
+              }
+            </select>
+          </div>
+        }
       </div>
 
+      <!-- Description -->
       <div class="form-group">
-        <label>Description</label>
-        <textarea formControlName="description" rows="3" placeholder="Full website development with modern UI/UX and CMS integration."></textarea>
+        <label>Project Description *</label>
+        <textarea
+          formControlName="description"
+          rows="4"
+          placeholder="Describe deliverables, architecture goals, technical specifications, and milestones..."
+        ></textarea>
+        @if (projectForm.get('description')?.invalid && projectForm.get('description')?.touched) {
+          <small class="error-msg">Project description is required (min 15 characters).</small>
+        }
       </div>
 
+      <!-- Required Skills & Preset Chips -->
+      <div class="form-group">
+        <label>Required Skills * (comma-separated)</label>
+        <input
+          pInputText
+          type="text"
+          formControlName="requiredSkills"
+          placeholder="e.g. Angular, TypeScript, NestJS, PostgreSQL"
+        />
+        <div class="quick-skill-pills">
+          <span class="pills-title">Suggested:</span>
+          @for (s of quickSkills; track s) {
+            <button
+              type="button"
+              class="quick-pill-btn"
+              (click)="addSkillPill(s)"
+            >
+              + {{ s }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Attachments / Document Links -->
+      <div class="form-group">
+        <label>Project Attachments / Specs Link (Optional)</label>
+        <input
+          pInputText
+          type="text"
+          formControlName="attachments"
+          placeholder="e.g. https://figma.com/file/... or Project_Brief.pdf"
+        />
+      </div>
+
+      <!-- Additional Requirements -->
+      <div class="form-group">
+        <label>Additional Requirements (Optional)</label>
+        <input
+          pInputText
+          type="text"
+          formControlName="additionalRequirements"
+          placeholder="e.g. Daily standups, code review via PRs, NDA required"
+        />
+      </div>
+
+      <!-- Modal Footer with Save as Draft & Publish -->
       <div class="modal-footer-btns">
-        <p-button label="Cancel" severity="secondary" [outlined]="true" (onClick)="closeModal()" />
-        <p-button type="submit" label="Create Project" icon="pi pi-check" [disabled]="projectForm.invalid" />
+        <p-button
+          label="Cancel"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="closeModal()"
+        />
+
+        @if (authService.isClient()) {
+          <button
+            type="button"
+            class="btn btn-outline"
+            [disabled]="projectForm.invalid"
+            (click)="saveProject('Draft')"
+          >
+            <i class="pi pi-save"></i> Save as Draft
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="projectForm.invalid"
+            (click)="saveProject('Published')"
+          >
+            <i class="pi pi-bolt"></i> Publish Project
+          </button>
+        } @else {
+          <p-button
+            type="button"
+            label="Save Project"
+            icon="pi pi-check"
+            [disabled]="projectForm.invalid"
+            (onClick)="saveProject('Planning')"
+          />
+        }
       </div>
     </form>
+  </p-dialog>
+
+  <!-- Review Proposals Modal -->
+  <p-dialog
+    [header]="'Proposals for ' + (selectedProjectForProposals()?.title || 'Project')"
+    [visible]="showProposalsModal()"
+    (visibleChange)="showProposalsModal.set($event)"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '94vw', maxWidth: '780px' }"
+  >
+    @if (selectedProjectForProposals()) {
+      <div class="proposals-dialog-header">
+        <div class="proj-highlight">
+          <span class="label">Project Budget:</span>
+          <strong>{{ selectedProjectForProposals()?.budget | currencyInr }}</strong>
+          <span class="status-chip">{{ selectedProjectForProposals()?.status }}</span>
+        </div>
+        <p class="guidance-text">
+          Review incoming freelancer bids. Accepting a proposal automatically assigns the contract and notifies the freelancer.
+        </p>
+      </div>
+
+      @if (loadingProposals()) {
+        <div class="loading-state">
+          <i class="pi pi-spin pi-spinner text-2xl text-blue-600"></i>
+          <span>Loading proposals...</span>
+        </div>
+      } @else if (activeProjectProposals().length === 0) {
+        <div class="empty-proposals-box">
+          <i class="pi pi-inbox text-3xl text-slate-400 mb-2"></i>
+          <h4>No proposals submitted yet</h4>
+          <p>
+            When freelancers in the Marketplace submit quotes for this project, they will appear here for your review.
+          </p>
+        </div>
+      } @else {
+        <div class="proposals-list">
+          @for (prop of activeProjectProposals(); track prop.id) {
+            <div class="proposal-card" [class.accepted]="prop.status === 'Accepted'">
+              <div class="proposal-header">
+                <div class="freelancer-profile">
+                  <div class="avatar-circle">
+                    <i class="pi pi-user"></i>
+                  </div>
+                  <div>
+                    <h4 class="freelancer-name">{{ prop.freelancerName }}</h4>
+                    <span class="submitted-date">Submitted: {{ prop.createdAt | date: 'mediumDate' }}</span>
+                  </div>
+                </div>
+
+                <div class="bid-metrics">
+                  <div class="bid-price">
+                    <span class="price-sub">Bid Amount</span>
+                    <span class="price-val">{{ prop.proposedPrice | currencyInr }}</span>
+                  </div>
+                  <div class="delivery-time">
+                    <span class="time-sub">Delivery</span>
+                    <span class="time-val">{{ prop.estimatedDelivery }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cover Letter -->
+              <div class="cover-letter-box">
+                <span class="letter-label">Pitch / Cover Letter:</span>
+                <p class="letter-text">{{ prop.coverLetter }}</p>
+              </div>
+
+              @if (prop.relevantExperience) {
+                <div class="experience-box">
+                  <strong>Track Record:</strong> {{ prop.relevantExperience }}
+                </div>
+              }
+
+              <!-- Actions & Status -->
+              <div class="proposal-footer">
+                <div class="status-indicator">
+                  <p-tag
+                    [value]="prop.status"
+                    [severity]="
+                      prop.status === 'Accepted'
+                        ? 'success'
+                        : prop.status === 'Rejected'
+                          ? 'danger'
+                          : 'info'
+                    "
+                  />
+                </div>
+
+                <div class="footer-actions">
+                  @if (prop.status === 'Submitted' || prop.status === 'Under Review') {
+                    <button
+                      type="button"
+                      class="btn btn-outline btn-sm text-red-600"
+                      (click)="rejectProposal(prop)"
+                    >
+                      <i class="pi pi-times"></i> Decline
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm"
+                      (click)="acceptProposal(prop)"
+                    >
+                      <i class="pi pi-check"></i> Accept & Assign Project
+                    </button>
+                  } @else if (prop.status === 'Accepted') {
+                    <span class="winner-badge"><i class="pi pi-check-circle"></i> Assigned Freelancer</span>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
   </p-dialog>
 </div>

@@ -30,6 +30,8 @@ describe('ProjectsComponent', () => {
       status: 'In Progress',
       priority: 'High',
       progress: 65,
+      requiredSkills: ['Angular', 'NestJS'],
+      proposalsCount: 2,
       tags: ['Angular', 'NestJS'],
       tasks: [],
       milestones: [],
@@ -49,6 +51,8 @@ describe('ProjectsComponent', () => {
       status: 'Planning',
       priority: 'Medium',
       progress: 20,
+      requiredSkills: ['Node.js'],
+      proposalsCount: 0,
       tags: ['Node.js'],
       tasks: [],
       milestones: [],
@@ -121,5 +125,42 @@ describe('ProjectsComponent', () => {
     expect(createSpy).toHaveBeenCalled();
     expect(msgSpy).toHaveBeenCalledWith(expect.objectContaining({ severity: 'success' }));
     expect(component.showModal()).toBe(false);
+  });
+
+  it('should publish a draft project via projectService.updateProjectStatus', () => {
+    const statusSpy = vi.spyOn(projectService, 'updateProjectStatus').mockReturnValue(of({} as any));
+    const msgSpy = vi.spyOn(messageService, 'add');
+
+    component.publishProject(mockProjects[0]);
+    expect(statusSpy).toHaveBeenCalledWith('prj_1', 'Published');
+    expect(msgSpy).toHaveBeenCalledWith(expect.objectContaining({ severity: 'success' }));
+  });
+
+  it('should open and load proposals in the proposals review modal', () => {
+    const propSpy = vi.spyOn(projectService, 'getProjectProposals').mockReturnValue(of([
+      {
+        id: 'prop_1',
+        projectId: 'prj_1',
+        projectTitle: 'E-Commerce Platform',
+        freelancerId: 'f1',
+        freelancerName: 'Premkumar',
+        freelancerEmail: 'prem@lancenexa.dev',
+        proposedPrice: 140000,
+        estimatedDelivery: '30 Days',
+        coverLetter: 'Test cover letter',
+        status: 'Submitted',
+        createdAt: '2026-09-30'
+      }
+    ]));
+
+    component.openProposalsModal(mockProjects[0]);
+
+    expect(component.showProposalsModal()).toBe(true);
+    expect(component.selectedProjectForProposals()?.id).toBe('prj_1');
+    expect(propSpy).toHaveBeenCalledWith('prj_1');
+    expect(component.activeProjectProposals().length).toBe(1);
+
+    component.closeProposalsModal();
+    expect(component.showProposalsModal()).toBe(false);
   });
 });

@@ -36,6 +36,11 @@ export const routes: Routes = [
           import('./features/clients/clients.component').then(m => m.ClientsComponent)
       },
       {
+        path: 'browse-projects',
+        loadComponent: () =>
+          import('./features/projects/browse-projects/browse-projects.component').then(m => m.BrowseProjectsComponent)
+      },
+      {
         path: 'projects',
         loadComponent: () =>
           import('./features/projects/projects.component').then(m => m.ProjectsComponent)

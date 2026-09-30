@@ -12,6 +12,7 @@ import {
   Payment,
   Document,
   Notification,
+  Proposal,
 } from '../entities/index.js';
 
 @Injectable()
@@ -28,6 +29,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     @InjectRepository(Payment) private paymentRepo: Repository<Payment>,
     @InjectRepository(Document) private docRepo: Repository<Document>,
     @InjectRepository(Notification) private notifRepo: Repository<Notification>,
+    @InjectRepository(Proposal) private proposalRepo: Repository<Proposal>,
   ) {}
 
   async onApplicationBootstrap() {
@@ -41,6 +43,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
       await this.seedPayments();
       await this.seedDocuments();
       await this.seedNotifications();
+      await this.seedProposals();
       this.logger.log('✅ PostgreSQL database schema & initial seed ready');
     } catch (err: any) {
       this.logger.warn(`Database seeding notice: ${err?.message || err}`);
@@ -156,8 +159,39 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
         progress: 75,
         description: 'Custom corporate web portal with Angular and NestJS.',
         category: 'Web App',
+        requiredSkills: ['Angular', 'TypeScript', 'NestJS', 'PostgreSQL'],
         tasksCount: 6,
         completedTasks: 4,
+      },
+      {
+        name: 'Cloud Infrastructure & CI/CD Pipeline',
+        client: 'ABC Pvt Ltd',
+        status: 'Published',
+        deadline: '15 Dec 2026',
+        budget: 65000,
+        spent: 0,
+        progress: 0,
+        description: 'Automated blue-green deployment pipeline with Terraform and Docker on AWS cloud.',
+        category: 'DevOps & Cloud',
+        requiredSkills: ['Docker', 'Kubernetes', 'AWS', 'GitHub Actions', 'Terraform'],
+        proposalsCount: 2,
+        tasksCount: 0,
+        completedTasks: 0,
+      },
+      {
+        name: 'Mobile Banking Cross-Platform App',
+        client: 'ABC Pvt Ltd',
+        status: 'Draft',
+        deadline: '25 Jan 2027',
+        budget: 95000,
+        spent: 0,
+        progress: 0,
+        description: 'Secure client-facing banking dashboard with biometric auth and transaction history.',
+        category: 'Mobile Apps',
+        requiredSkills: ['Flutter', 'Dart', 'Node.js', 'PostgreSQL'],
+        proposalsCount: 0,
+        tasksCount: 0,
+        completedTasks: 0,
       },
       {
         name: 'Mobile App UI/UX',
@@ -169,6 +203,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
         progress: 40,
         description: 'Complete cross-platform design tokens and prototype.',
         category: 'Mobile Design',
+        requiredSkills: ['Figma', 'UI/UX', 'Mobile Design'],
         tasksCount: 5,
         completedTasks: 2,
       },
@@ -182,6 +217,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
         progress: 20,
         description: 'Multi-vendor marketplace with UPI payments.',
         category: 'E-Commerce',
+        requiredSkills: ['Next.js', 'Stripe', 'Node.js'],
         tasksCount: 8,
         completedTasks: 1,
       },
@@ -446,5 +482,49 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
         targetUrl: '/tasks',
       },
     ]);
+  }
+
+  private async seedProposals() {
+    const count = await this.proposalRepo.count();
+    if (count > 0) return;
+
+    const project = await this.projectRepo.findOne({
+      where: [{ status: 'Published' }, { status: 'Under Review' }, { status: 'In Progress' }],
+    });
+    if (!project) return;
+
+    await this.proposalRepo.save([
+      {
+        projectId: project.id,
+        projectTitle: project.name,
+        freelancerId: 'user_prem_freelancer',
+        freelancerName: 'Premkumar',
+        freelancerEmail: 'prem@lancenexa.dev',
+        freelancerAvatar:
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
+        proposedPrice: Number(project.budget) || 75000,
+        estimatedDelivery: '25 Days',
+        coverLetter:
+          'Dear Client,\n\nI have extensive experience architecting enterprise full-stack web and cloud systems with Angular, NestJS, and PostgreSQL. I can deliver this project with complete test coverage, clean architecture, and modern UI tokens.\n\nLooking forward to collaborating!',
+        relevantExperience: '5+ years full-stack consulting, 20+ shipped enterprise web portals.',
+        status: 'Submitted',
+      },
+      {
+        projectId: project.id,
+        projectTitle: project.name,
+        freelancerId: 'user_arun_freelancer',
+        freelancerName: 'Arun Kumar',
+        freelancerEmail: 'arun.dev@lancenexa.dev',
+        freelancerAvatar:
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+        proposedPrice: (Number(project.budget) || 75000) - 5000,
+        estimatedDelivery: '30 Days',
+        coverLetter:
+          'Hello,\n\nI would love to work on this deliverable. I specialize in modern responsive dashboards, RESTful microservices, and database optimization.',
+        relevantExperience: 'Senior Frontend & Cloud Developer.',
+        status: 'Submitted',
+      },
+    ]);
+    this.logger.log('Seeded demo proposals');
   }
 }
