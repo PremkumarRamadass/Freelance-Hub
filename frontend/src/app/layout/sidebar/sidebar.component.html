@@ -1,17 +1,29 @@
 <aside class="app-sidebar" [class.collapsed]="isCollapsed()">
-  <!-- Brand Logo -->
+  <!-- Brand Logo & Top Collapse Toggle -->
   <div class="sidebar-brand">
-    <div class="brand-icon" [class.client-portal]="authService.isClient()">
-      <i [class]="authService.isClient() ? 'pi pi-building' : 'pi pi-bolt'"></i>
-    </div>
-    @if (!isCollapsed()) {
-      <div class="brand-text">
-        <span class="brand-name">Freelance<span>Hub</span></span>
-        @if (authService.isClient()) {
-          <span class="portal-badge">CLIENT</span>
-        }
+    <div class="brand-info">
+      <div class="brand-icon" [class.client-portal]="authService.isClient()">
+        <i [class]="authService.isClient() ? 'pi pi-building' : 'pi pi-bolt'"></i>
       </div>
-    }
+      @if (!isCollapsed()) {
+        <div class="brand-text">
+          <span class="brand-name">Freelance<span>Hub</span></span>
+          @if (authService.isClient()) {
+            <span class="portal-badge">CLIENT</span>
+          }
+        </div>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="sidebar-toggle-btn"
+      (click)="toggleCollapse()"
+      [title]="isCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+      aria-label="Toggle Sidebar"
+    >
+      <i [class]="isCollapsed() ? 'pi pi-angle-double-right' : 'pi pi-angle-double-left'"></i>
+    </button>
   </div>
 
   <!-- Navigation Menu -->
@@ -37,19 +49,4 @@
       }
     </ul>
   </nav>
-
-  <!-- User / Footer Toggle -->
-  <div class="sidebar-footer">
-    <button
-      type="button"
-      class="collapse-btn"
-      (click)="toggleCollapse()"
-      [title]="isCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
-    >
-      <i [class]="isCollapsed() ? 'pi pi-angle-double-right' : 'pi pi-angle-double-left'"></i>
-      @if (!isCollapsed()) {
-        <span>Collapse Menu</span>
-      }
-    </button>
-  </div>
 </aside>
