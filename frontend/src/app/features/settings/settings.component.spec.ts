@@ -16,7 +16,7 @@ describe('SettingsComponent', () => {
   const mockUser: User = {
     id: 'user_1',
     name: 'Premkumar',
-    email: 'prem@freelancehub.dev',
+    email: 'prem@lancenexus.dev',
     role: 'FREELANCER',
     phone: '+91 99999 88888',
     location: 'Chennai, India',
@@ -50,7 +50,7 @@ describe('SettingsComponent', () => {
   it('should initialize and populate profile form with current user data', () => {
     expect(component).toBeTruthy();
     expect(component.profileForm.get('name')?.value).toBe('Premkumar');
-    expect(component.profileForm.get('email')?.value).toBe('prem@freelancehub.dev');
+    expect(component.profileForm.get('email')?.value).toBe('prem@lancenexus.dev');
     expect(component.profileForm.get('phone')?.value).toBe('+91 99999 88888');
   });
 
@@ -66,14 +66,14 @@ describe('SettingsComponent', () => {
 
     component.profileForm.patchValue({
       name: 'Prem Updated',
-      email: 'prem.updated@freelancehub.dev'
+      email: 'prem.updated@lancenexus.dev'
     });
 
     component.updateProfile();
 
     expect(updateSpy).toHaveBeenCalledWith(expect.objectContaining({
       name: 'Prem Updated',
-      email: 'prem.updated@freelancehub.dev'
+      email: 'prem.updated@lancenexus.dev'
     }));
     expect(msgSpy).toHaveBeenCalledWith(expect.objectContaining({ severity: 'success' }));
   });

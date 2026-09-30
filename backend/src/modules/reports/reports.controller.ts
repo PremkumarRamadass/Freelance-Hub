@@ -32,7 +32,7 @@ export class ReportsController {
   async exportCsv(@Res() res: Response) {
     const csv = await this.reportsService.exportCsvData();
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename="FreelanceHub_Report.csv"');
+    res.setHeader('Content-Disposition', 'attachment; filename="LanceNexus_Report.csv"');
     return res.send(csv);
   }
 }

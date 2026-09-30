@@ -1,4 +1,4 @@
-# 🚀 FreelanceHub — Enterprise Freelancer Project Management Platform
+# 🚀 LanceNexus — Enterprise Freelancer Project Management Platform
 
 An enterprise-grade, role-based Freelancer Project Management, Invoicing, and Milestone Tracking platform built with **Angular 22**, **PrimeNG 22**, **Angular Signals**, **RxJS**, **NestJS**, and **TypeScript**.
 
@@ -116,7 +116,7 @@ Freelancer app/
 
 ## 💼 Interview Talking Points
 
-> *"I architected and developed a full-stack, role-based Freelancer Project Management Platform named **FreelanceHub** using **Angular 22**, **TypeScript**, **Signals**, **PrimeNG**, and **NestJS**.*
+> *"I architected and developed a full-stack, role-based Freelancer Project Management Platform named **LanceNexus** using **Angular 22**, **TypeScript**, **Signals**, **PrimeNG**, and **NestJS**.*
 >
 > *Key technical highlights:*
 > - *Replaced legacy NgRx boilerplate with **Angular Signals** (`signal`, `computed`) for reactive state management.*
