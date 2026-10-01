@@ -11,6 +11,8 @@ import { DashboardModule } from './modules/dashboard/dashboard.module.js';
 import { ReportsModule } from './modules/reports/reports.module.js';
 import { DocumentsModule } from './modules/documents/documents.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
+import { ProposalsModule } from './modules/proposals/proposals.module.js';
+import { ChatModule } from './modules/chat/chat.module.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 
@@ -31,6 +33,8 @@ import { AppService } from './app.service.js';
     ReportsModule,
     DocumentsModule,
     NotificationsModule,
+    ProposalsModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

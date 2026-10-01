@@ -36,6 +36,11 @@ export const routes: Routes = [
           import('./features/clients/clients.component').then(m => m.ClientsComponent)
       },
       {
+        path: 'browse-projects',
+        loadComponent: () =>
+          import('./features/projects/browse-projects/browse-projects.component').then(m => m.BrowseProjectsComponent)
+      },
+      {
         path: 'projects',
         loadComponent: () =>
           import('./features/projects/projects.component').then(m => m.ProjectsComponent)
@@ -94,6 +99,11 @@ export const routes: Routes = [
         path: 'settings',
         loadComponent: () =>
           import('./features/settings/settings.component').then(m => m.SettingsComponent)
+      },
+      {
+        path: 'chat',
+        loadComponent: () =>
+          import('./features/chat/chat.component').then(m => m.ChatComponent)
       }
     ]
   },

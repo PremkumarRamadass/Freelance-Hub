@@ -22,7 +22,7 @@ export class LoginComponent {
   selectedRoleMode = signal<UserRole>('FREELANCER');
 
   loginForm: FormGroup = this.fb.group({
-    email: ['prem@freelancehub.dev', [Validators.required, Validators.email]],
+    email: ['prem@lancenexa.dev', [Validators.required, Validators.email]],
     password: ['freelancer123', [Validators.required, Validators.minLength(6)]]
   });
 
@@ -35,12 +35,12 @@ export class LoginComponent {
       });
     } else if (role === 'ADMIN') {
       this.loginForm.patchValue({
-        email: 'admin@freelancehub.dev',
+        email: 'admin@lancenexa.dev',
         password: 'admin123'
       });
     } else {
       this.loginForm.patchValue({
-        email: 'prem@freelancehub.dev',
+        email: 'prem@lancenexa.dev',
         password: 'freelancer123'
       });
     }

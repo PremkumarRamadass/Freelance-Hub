@@ -31,12 +31,14 @@ export class SidebarComponent {
         { label: 'Invoices', icon: 'pi-file', route: '/invoices' },
         { label: 'Documents', icon: 'pi-paperclip', route: '/documents' },
         { label: 'Notifications', icon: 'pi-bell', route: '/notifications', badge: '1' },
+        { label: 'AI Assistant & Chat', icon: 'pi-comments', route: '/chat' },
         { label: 'Settings', icon: 'pi-cog', route: '/settings' }
       ];
     }
 
     return [
       { label: 'Dashboard', icon: 'pi-th-large', route: '/dashboard' },
+      { label: 'Browse Projects', icon: 'pi-compass', route: '/browse-projects' },
       { label: 'Clients', icon: 'pi-users', route: '/clients' },
       { label: 'Projects', icon: 'pi-folder', route: '/projects' },
       { label: 'Tasks', icon: 'pi-check-square', route: '/tasks' },
@@ -46,6 +48,7 @@ export class SidebarComponent {
       { label: 'Reports', icon: 'pi-chart-line', route: '/reports' },
       { label: 'Documents', icon: 'pi-paperclip', route: '/documents' },
       { label: 'Notifications', icon: 'pi-bell', route: '/notifications', badge: '3' },
+      { label: 'AI Assistant & Chat', icon: 'pi-comments', route: '/chat' },
       { label: 'Settings', icon: 'pi-cog', route: '/settings' }
     ];
   });

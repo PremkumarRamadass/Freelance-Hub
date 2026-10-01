@@ -1,4 +1,4 @@
-# 🚀 FreelanceHub — Enterprise Freelancer Project Management Platform
+# 🚀 LanceNexa — Enterprise Freelancer Project Management Platform
 
 An enterprise-grade, role-based Freelancer Project Management, Invoicing, and Milestone Tracking platform built with **Angular 22**, **PrimeNG 22**, **Angular Signals**, **RxJS**, **NestJS**, and **TypeScript**.
 

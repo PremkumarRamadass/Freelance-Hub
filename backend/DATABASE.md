@@ -1,6 +1,6 @@
-# FreelanceHub Database Architecture (PostgreSQL & TypeORM)
+# LanceNexa Database Architecture (PostgreSQL & TypeORM)
 
-This document describes the PostgreSQL database schema, TypeORM configuration, entity relationships, and operational instructions for FreelanceHub.
+This document describes the PostgreSQL database schema, TypeORM configuration, entity relationships, and operational instructions for LanceNexa.
 
 ---
 
@@ -151,9 +151,9 @@ DB_SSL=true
 ## 4. Automatic Seeding
 
 Upon first boot, the `DatabaseSeedService` automatically verifies whether tables are populated. If empty, it seeds:
-* **Freelancer Account**: `prem@freelancehub.dev` (pass: `freelancer123`)
+* **Freelancer Account**: `prem@lancenexa.dev` (pass: `freelancer123`)
 * **Client Account**: `rahul@abcpvtltd.com` (pass: `client123`)
-* **Admin Account**: `admin@freelancehub.dev` (pass: `admin123`)
+* **Admin Account**: `admin@lancenexa.dev` (pass: `admin123`)
 * Realistic client records, active projects, tasks, GST quotations, and invoices.
 
 ---

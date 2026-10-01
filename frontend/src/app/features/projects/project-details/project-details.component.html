@@ -1,23 +1,29 @@
 <div class="project-details-container">
   <!-- Breadcrumb -->
   <div class="breadcrumb">
-    <a routerLink="/projects">Projects</a>
+    <a routerLink="/projects">{{ authService.isClient() ? 'My Projects' : 'Projects' }}</a>
     <i class="pi pi-angle-right"></i>
-    <span>{{ project()?.title || 'Website Development' }}</span>
+    <span>{{ project()?.title || 'Project Details' }}</span>
   </div>
 
   <!-- Header -->
   <div class="proj-head">
     <div class="title-row">
       <div class="title-with-badge">
-        <h2>{{ project()?.title || 'Website Development' }}</h2>
-        <app-status-badge [status]="project()?.status || 'Active'" />
+        <h2>{{ project()?.title || 'Project Details' }}</h2>
+        <app-status-badge [status]="project()?.status || 'Planning'" />
       </div>
       <p class="proj-subtitle">{{ project()?.description || 'Full website development with modern UI/UX and CMS integration.' }}</p>
     </div>
     <div class="proj-head-actions">
-      <button type="button" class="btn btn-outline"><i class="pi pi-pencil"></i> Edit</button>
-      <button type="button" class="btn btn-outline icon-only"><i class="pi pi-ellipsis-h"></i></button>
+      @if (project()?.status === 'Published' && authService.isFreelancer()) {
+        <button type="button" class="btn btn-primary" (click)="openProposalModal()">
+          <i class="pi pi-send"></i> Submit Proposal
+        </button>
+      }
+      <button type="button" class="btn btn-outline" routerLink="/projects">
+        <i class="pi pi-arrow-left"></i> Back to Projects
+      </button>
     </div>
   </div>
 
@@ -28,8 +34,8 @@
       <span class="m-value text-blue-600 font-semibold">{{ project()?.clientCompany || 'ABC Pvt Ltd' }}</span>
     </div>
     <div class="metric-item">
-      <span class="m-label">Start Date</span>
-      <span class="m-value font-medium">{{ project()?.startDate || '01 Oct 2026' }}</span>
+      <span class="m-label">Budget</span>
+      <span class="m-value font-bold text-slate-800">{{ (project()?.budget || 0) | currencyInr }} ({{ project()?.budgetType || 'Fixed' }})</span>
     </div>
     <div class="metric-item">
       <span class="m-label">Deadline</span>
@@ -38,10 +44,10 @@
     <div class="metric-item progress-metric">
       <div class="flex justify-between text-xs mb-1">
         <span class="m-label">Progress</span>
-        <span class="font-bold">{{ project()?.progress || 75 }}%</span>
+        <span class="font-bold">{{ project()?.progress || 0 }}%</span>
       </div>
       <div class="progress-bar-bg">
-        <div class="progress-bar-fill" [style.width.%]="project()?.progress || 75"></div>
+        <div class="progress-bar-fill" [style.width.%]="project()?.progress || 0"></div>
       </div>
     </div>
   </div>
@@ -55,6 +61,14 @@
       (click)="activeTab.set('overview')"
     >
       <i class="pi pi-info-circle"></i> Overview
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'proposals'"
+      (click)="activeTab.set('proposals')"
+    >
+      <i class="pi pi-users"></i> Proposals ({{ proposals().length }})
     </button>
     <button
       type="button"
@@ -103,9 +117,9 @@
         </div>
 
         <div class="section-group">
-          <h4>Technologies</h4>
+          <h4>Required Technologies & Skills</h4>
           <div class="tech-pills">
-            @for (t of (project()?.tags || ['Angular', 'Node.js', 'MongoDB', 'Tailwind CSS']); track t) {
+            @for (t of (project()?.requiredSkills || project()?.tags || ['Angular', 'Node.js', 'PostgreSQL']); track t) {
               <span class="tech-pill">{{ t }}</span>
             }
           </div>
@@ -114,77 +128,166 @@
         <div class="meta-details-grid">
           <div class="meta-col">
             <span class="m-label">Budget</span>
-            <span class="m-val-bold">{{ (project()?.budget || 75000) | currencyInr }}</span>
+            <span class="m-val-bold">{{ (project()?.budget || 0) | currencyInr }}</span>
+          </div>
+          <div class="meta-col">
+            <span class="m-label">Budget Type</span>
+            <span class="m-val-bold">{{ project()?.budgetType || 'Fixed Price' }}</span>
+          </div>
+          <div class="meta-col">
+            <span class="m-label">Category</span>
+            <span class="m-val-bold">{{ project()?.category || 'Web App' }}</span>
           </div>
           <div class="meta-col">
             <span class="m-label">Status</span>
-            <app-status-badge [status]="project()?.status || 'Active'" />
-          </div>
-          <div class="meta-col">
-            <span class="m-label">Start Date</span>
-            <span class="m-val">{{ project()?.startDate || '01 Oct 2026' }}</span>
-          </div>
-          <div class="meta-col">
-            <span class="m-label">Created By</span>
-            <span class="m-val font-semibold">Premkumar</span>
-          </div>
-          <div class="meta-col">
-            <span class="m-label">Deadline</span>
-            <span class="m-val text-red-600 font-semibold">{{ project()?.deadline || '30 Nov 2026' }}</span>
-          </div>
-          <div class="meta-col">
-            <span class="m-label">Priority</span>
-            <span class="priority-badge high">High</span>
+            <span class="m-val-bold">{{ project()?.status }}</span>
           </div>
         </div>
-      } @else if (activeTab() === 'tasks') {
-        <div class="tasks-tab-view">
-          <h4>Project Tasks ({{ project()?.tasks?.length || 5 }})</h4>
-          <div class="tasks-list">
-            @for (t of project()?.tasks || []; track t.id) {
-              <div class="task-row">
-                <input type="checkbox" [checked]="t.completed" (change)="toggleTask(t.id)" />
-                <span class="task-title" [class.done]="t.completed">{{ t.title }}</span>
+
+        @if (project()?.assignedFreelancerName) {
+          <div class="assigned-freelancer-banner">
+            <div class="banner-icon"><i class="pi pi-user-check"></i></div>
+            <div>
+              <strong>Assigned Freelancer:</strong>
+              <span>{{ project()?.assignedFreelancerName }} ({{ project()?.assignedFreelancerEmail }})</span>
+            </div>
+          </div>
+        }
+      }
+
+      @if (activeTab() === 'proposals') {
+        <div class="section-group">
+          <div class="proposals-tab-head">
+            <h4>Freelancer Proposals ({{ proposals().length }})</h4>
+            @if (project()?.status === 'Published' && authService.isFreelancer()) {
+              <button type="button" class="btn btn-primary btn-sm" (click)="openProposalModal()">
+                <i class="pi pi-send"></i> Submit Your Quote
+              </button>
+            }
+          </div>
+
+          @if (proposals().length === 0) {
+            <div class="empty-tab-box">
+              <i class="pi pi-file-edit text-2xl text-slate-400 mb-2"></i>
+              <p>No proposals submitted for this project yet.</p>
+            </div>
+          } @else {
+            <div class="details-proposals-list">
+              @for (prop of proposals(); track prop.id) {
+                <div class="proposal-item-card" [class.is-winner]="prop.status === 'Accepted'">
+                  <div class="item-head">
+                    <div class="freelancer-info">
+                      <span class="avatar-pill"><i class="pi pi-user"></i></span>
+                      <div>
+                        <strong>{{ prop.freelancerName }}</strong>
+                        <span class="prop-date">{{ prop.createdAt | date: 'mediumDate' }}</span>
+                      </div>
+                    </div>
+
+                    <div class="prop-quote-box">
+                      <span class="quote-amount">{{ prop.proposedPrice | currencyInr }}</span>
+                      <span class="quote-days">{{ prop.estimatedDelivery }}</span>
+                    </div>
+                  </div>
+
+                  <p class="prop-letter">{{ prop.coverLetter }}</p>
+
+                  @if (prop.relevantExperience) {
+                    <p class="prop-exp"><strong>Experience:</strong> {{ prop.relevantExperience }}</p>
+                  }
+
+                  <div class="item-foot">
+                    <p-tag
+                      [value]="prop.status"
+                      [severity]="
+                        prop.status === 'Accepted'
+                          ? 'success'
+                          : prop.status === 'Rejected'
+                            ? 'danger'
+                            : 'info'
+                      "
+                    />
+
+                    @if (authService.isClient() && (prop.status === 'Submitted' || prop.status === 'Under Review')) {
+                      <div class="prop-actions">
+                        <button type="button" class="btn btn-outline btn-sm text-red-600" (click)="rejectProposal(prop)">
+                          Decline
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm" (click)="acceptProposal(prop)">
+                          Accept & Assign
+                        </button>
+                      </div>
+                    } @else if (prop.status === 'Accepted') {
+                      <span class="winner-label"><i class="pi pi-check-circle"></i> Assigned Contract</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (activeTab() === 'tasks') {
+        <div class="section-group">
+          <h4>Tasks & Deliverables</h4>
+          <div class="tasks-checklist">
+            @for (t of (project()?.tasks || []); track t.id) {
+              <div class="task-check-row" [class.done]="t.completed">
+                <input type="checkbox" [checked]="t.completed" (change)="toggleTask(t.id)" id="chk_{{ t.id }}" />
+                <label for="chk_{{ t.id }}">{{ t.title }}</label>
                 <span class="task-due">{{ t.dueDate }}</span>
-                <app-status-badge [status]="t.completed ? 'Completed' : 'Pending'" />
               </div>
             }
           </div>
         </div>
-      } @else {
-        <div class="placeholder-tab">
-          <i class="pi pi-inbox text-3xl text-slate-300"></i>
-          <p>No extra documents uploaded yet.</p>
+      }
+
+      @if (activeTab() === 'files') {
+        <div class="section-group">
+          <h4>Project Files & Specifications</h4>
+          <p class="desc-text">Architecture diagrams, design specifications, and deliverables repository.</p>
+        </div>
+      }
+
+      @if (activeTab() === 'payments') {
+        <div class="section-group">
+          <h4>Milestone Payments</h4>
+          <p class="desc-text">Escrow milestone reconciliation and invoice status.</p>
+        </div>
+      }
+
+      @if (activeTab() === 'activity') {
+        <div class="section-group">
+          <h4>Recent Activity & Sprint Logs</h4>
+          <p class="desc-text">Project created, proposals reviewed, and milestone updates.</p>
         </div>
       }
     </div>
 
-    <!-- Right Sidebar (Team & Milestones) -->
-    <div class="details-side">
+    <!-- Right Sidebar Column -->
+    <div class="details-sidebar">
       <!-- Team Members Card -->
       <div class="card team-card">
         <div class="side-card-header">
           <h4>Team Members</h4>
         </div>
         <div class="team-list">
-          <div class="member-item">
-            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Avatar" class="avatar" />
-            <div class="member-meta">
+          <div class="team-member">
+            <div class="member-avatar">P</div>
+            <div class="member-info">
               <span class="member-name">Premkumar</span>
-              <span class="member-role">Project Owner</span>
+              <span class="member-role">Full Stack Architect</span>
             </div>
           </div>
-          <div class="member-item">
-            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Avatar" class="avatar" />
-            <div class="member-meta">
-              <span class="member-name">Rahul</span>
-              <span class="member-role">Client</span>
+          <div class="team-member">
+            <div class="member-avatar client-avatar">R</div>
+            <div class="member-info">
+              <span class="member-name">Rahul Sharma</span>
+              <span class="member-role">Client Representative</span>
             </div>
           </div>
         </div>
-        <button type="button" class="btn-add-member">
-          <i class="pi pi-plus"></i> Add Member
-        </button>
       </div>
 
       <!-- Milestones Card -->
@@ -214,15 +317,50 @@
             </div>
             <app-status-badge status="Pending" />
           </div>
-          <div class="milestone-row">
-            <div class="m-left">
-              <i class="pi pi-circle-fill text-xs text-slate-300"></i>
-              <span>Deployment</span>
-            </div>
-            <app-status-badge status="Pending" />
-          </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Submit Proposal Modal -->
+  <p-dialog
+    header="Submit Project Quotation & Proposal"
+    [visible]="showProposalModal()"
+    (visibleChange)="showProposalModal.set($event)"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '92vw', maxWidth: '640px' }"
+  >
+    <form [formGroup]="proposalForm" (ngSubmit)="submitProposal()" class="proposal-dialog-form">
+      <div class="form-group">
+        <label>Proposed Price (INR) *</label>
+        <input pInputText type="number" formControlName="proposedPrice" placeholder="50000" />
+      </div>
+
+      <div class="form-group">
+        <label>Estimated Delivery Time *</label>
+        <input pInputText type="text" formControlName="estimatedDelivery" placeholder="e.g. 15 Days, 3 Weeks" />
+      </div>
+
+      <div class="form-group">
+        <label>Cover Letter / Technical Approach *</label>
+        <textarea
+          formControlName="coverLetter"
+          rows="5"
+          placeholder="Describe your architecture plan, timeline, and deliverables..."
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Relevant Experience</label>
+        <input pInputText type="text" formControlName="relevantExperience" placeholder="Track record on similar projects" />
+      </div>
+
+      <div class="modal-btns">
+        <p-button label="Cancel" severity="secondary" [outlined]="true" (onClick)="closeProposalModal()" />
+        <p-button type="submit" label="Submit Proposal" icon="pi pi-send" [loading]="isSubmitting()" [disabled]="proposalForm.invalid || isSubmitting()" />
+      </div>
+    </form>
+  </p-dialog>
 </div>
