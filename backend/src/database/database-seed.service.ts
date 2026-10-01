@@ -51,20 +51,17 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
   }
 
   private async seedUsers() {
-    const count = await this.userRepo.count();
-    if (count > 0) return;
-
     const salt = await bcrypt.genSalt(10);
     const freelancerPass = await bcrypt.hash('freelancer123', salt);
     const clientPass = await bcrypt.hash('client123', salt);
     const adminPass = await bcrypt.hash('admin123', salt);
 
-    await this.userRepo.save([
+    const demoUsers = [
       {
         name: 'Premkumar',
         email: 'prem@lancenexa.dev',
         password: freelancerPass,
-        role: 'FREELANCER',
+        role: 'FREELANCER' as const,
         title: 'Full Stack Architect & Consultant',
         hourlyRate: 2500,
         phone: '+91 98765 43210',
@@ -72,10 +69,21 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
           'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
       },
       {
+        name: 'Freelancer Demo',
+        email: 'freelancer@lancenexa.dev',
+        password: freelancerPass,
+        role: 'FREELANCER' as const,
+        title: 'Senior Software Engineer',
+        hourlyRate: 2000,
+        phone: '+91 98765 11111',
+        avatarUrl:
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
+      },
+      {
         name: 'Rahul Sharma',
         email: 'rahul@abcpvtltd.com',
         password: clientPass,
-        role: 'CLIENT',
+        role: 'CLIENT' as const,
         companyName: 'ABC Pvt Ltd',
         title: 'Managing Director',
         phone: '+91 98200 12345',
@@ -83,17 +91,39 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
           'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
       },
       {
+        name: 'Client Demo',
+        email: 'client@lancenexa.dev',
+        password: clientPass,
+        role: 'CLIENT' as const,
+        companyName: 'LanceNexa Client Co',
+        title: 'Project Sponsor',
+        phone: '+91 98200 54321',
+        avatarUrl:
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+      },
+      {
         name: 'Super Admin',
         email: 'admin@lancenexa.dev',
         password: adminPass,
-        role: 'ADMIN',
+        role: 'ADMIN' as const,
         companyName: 'LanceNexa Agency',
         title: 'Operations Director',
         phone: '+91 99999 88888',
         avatarUrl:
           'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80',
       },
-    ]);
+    ];
+
+    for (const u of demoUsers) {
+      const existing = await this.userRepo.findOne({ where: { email: u.email } });
+      if (!existing) {
+        await this.userRepo.save(this.userRepo.create(u));
+      } else {
+        existing.password = u.password;
+        await this.userRepo.save(existing);
+      }
+    }
+
     this.logger.log('Seeded demo users (Freelancer, Client, Admin)');
   }
 
