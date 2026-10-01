@@ -1,7 +1,8 @@
 import { Component, inject, signal, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, NavigationEnd, RouterModule } from '@angular/router';
+import { filter } from 'rxjs';
 import { ChatService } from '../../../core/services/chat.service';
 
 @Component({
@@ -12,11 +13,26 @@ import { ChatService } from '../../../core/services/chat.service';
   styleUrl: './chat-widget.component.scss'
 })
 export class ChatWidgetComponent implements AfterViewChecked {
+  private router = inject(Router);
   chatService = inject(ChatService);
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
   inputMessage = signal<string>('');
+  readonly isOnChatPage = signal<boolean>(false);
+
+  constructor() {
+    this.isOnChatPage.set(this.router.url.includes('/chat'));
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        const isChat = event.urlAfterRedirects?.includes('/chat') || event.url?.includes('/chat');
+        this.isOnChatPage.set(!!isChat);
+        if (isChat) {
+          this.chatService.closeWidget();
+        }
+      });
+  }
 
   ngAfterViewChecked(): void {
     this.scrollToBottom();

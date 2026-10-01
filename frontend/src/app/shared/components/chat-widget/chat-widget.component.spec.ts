@@ -51,4 +51,12 @@ describe('ChatWidgetComponent', () => {
 
     expect(sendSpy).toHaveBeenCalledWith('What are my active projects?');
   });
+
+  it('should detect when on chat page and hide floating widget', () => {
+    expect(component.isOnChatPage()).toBe(false);
+    component.isOnChatPage.set(true);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement;
+    expect(compiled.querySelector('.chat-widget-wrapper')).toBeNull();
+  });
 });
