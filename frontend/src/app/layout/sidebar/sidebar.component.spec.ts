@@ -47,6 +47,7 @@ describe('SidebarComponent', () => {
     expect(labels).toContain('Clients');
     expect(labels).toContain('Payments');
     expect(labels).toContain('Reports');
+    expect(labels).toContain('AI Assistant & Chat');
   });
 
   it('should compute client navigation items when current user is client', () => {
@@ -62,6 +63,7 @@ describe('SidebarComponent', () => {
     const items = component.navItems();
     const labels = items.map(i => i.label);
     expect(labels).toContain('My Projects');
+    expect(labels).toContain('AI Assistant & Chat');
     expect(labels).not.toContain('Clients');
     expect(labels).not.toContain('Payments');
   });

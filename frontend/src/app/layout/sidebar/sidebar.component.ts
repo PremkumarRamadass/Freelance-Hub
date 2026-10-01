@@ -31,6 +31,7 @@ export class SidebarComponent {
         { label: 'Invoices', icon: 'pi-file', route: '/invoices' },
         { label: 'Documents', icon: 'pi-paperclip', route: '/documents' },
         { label: 'Notifications', icon: 'pi-bell', route: '/notifications', badge: '1' },
+        { label: 'AI Assistant & Chat', icon: 'pi-comments', route: '/chat' },
         { label: 'Settings', icon: 'pi-cog', route: '/settings' }
       ];
     }
@@ -47,6 +48,7 @@ export class SidebarComponent {
       { label: 'Reports', icon: 'pi-chart-line', route: '/reports' },
       { label: 'Documents', icon: 'pi-paperclip', route: '/documents' },
       { label: 'Notifications', icon: 'pi-bell', route: '/notifications', badge: '3' },
+      { label: 'AI Assistant & Chat', icon: 'pi-comments', route: '/chat' },
       { label: 'Settings', icon: 'pi-cog', route: '/settings' }
     ];
   });

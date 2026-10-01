@@ -12,6 +12,7 @@ import {
   Document,
   Notification,
   Proposal,
+  ChatMessage,
 } from '../entities/index.js';
 import { DatabaseSeedService } from './database-seed.service.js';
 
@@ -60,6 +61,7 @@ import { DatabaseSeedService } from './database-seed.service.js';
       Document,
       Notification,
       Proposal,
+      ChatMessage,
     ]),
   ],
   providers: [DatabaseSeedService],

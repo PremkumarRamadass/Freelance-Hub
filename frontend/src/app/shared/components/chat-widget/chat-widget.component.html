@@ -1,0 +1,168 @@
+<!-- Floating Chat Widget Container -->
+<div class="chat-widget-wrapper">
+  <!-- Floating Trigger Button -->
+  @if (!chatService.isWidgetOpen()) {
+    <button
+      type="button"
+      class="chat-floating-btn"
+      (click)="chatService.openWidget()"
+      title="Ask Nexa Assistant"
+      aria-label="Open AI Chat Assistant"
+    >
+      <div class="btn-glow-pulse"></div>
+      <i class="pi pi-bolt chat-icon"></i>
+      <span class="btn-label">AI Assistant</span>
+      <span class="online-indicator"></span>
+    </button>
+  }
+
+  <!-- Chat Drawer / Modal Box -->
+  @if (chatService.isWidgetOpen()) {
+    <div class="chat-popup-card animate-fade-in-up">
+      <!-- Header -->
+      <div class="chat-popup-header">
+        <div class="header-bot-info">
+          <div class="bot-avatar">
+            <i class="pi pi-bolt"></i>
+            <span class="avatar-dot"></span>
+          </div>
+          <div class="bot-titles">
+            <span class="bot-name">Nexa Assistant</span>
+            <span class="bot-status"><i class="pi pi-circle-fill"></i> Online • Instant Answers</span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <a
+            routerLink="/chat"
+            class="header-icon-btn"
+            title="Open Fullscreen Chat"
+            (click)="chatService.closeWidget()"
+          >
+            <i class="pi pi-external-link"></i>
+          </a>
+          <button
+            type="button"
+            class="header-icon-btn"
+            (click)="chatService.clearChat()"
+            title="Clear Chat History"
+          >
+            <i class="pi pi-trash"></i>
+          </button>
+          <button
+            type="button"
+            class="header-icon-btn close-btn"
+            (click)="chatService.closeWidget()"
+            title="Minimize"
+          >
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages Stream -->
+      <div class="chat-messages-body" #messagesContainer>
+        @for (msg of chatService.messages(); track msg.id) {
+          <div
+            class="message-row"
+            [class.user-row]="msg.senderRole === 'user'"
+            [class.assistant-row]="msg.senderRole === 'assistant'"
+          >
+            @if (msg.senderRole === 'assistant') {
+              <div class="row-avatar">
+                <i class="pi pi-bolt"></i>
+              </div>
+            }
+
+            <div class="bubble-wrap">
+              <div
+                class="message-bubble"
+                [innerHTML]="formatMessage(msg.message)"
+              ></div>
+
+              <!-- Action Links if provided by Assistant -->
+              @if (msg.actionLinks && msg.actionLinks.length > 0) {
+                <div class="bubble-action-links">
+                  @for (link of msg.actionLinks; track link.route) {
+                    <a
+                      [routerLink]="link.route"
+                      class="bubble-action-btn"
+                      (click)="chatService.closeWidget()"
+                    >
+                      <i [class]="'pi ' + link.icon"></i>
+                      <span>{{ link.label }}</span>
+                    </a>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Typing Indicator -->
+        @if (chatService.isLoading()) {
+          <div class="message-row assistant-row">
+            <div class="row-avatar">
+              <i class="pi pi-bolt"></i>
+            </div>
+            <div class="message-bubble typing-bubble">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Suggested Prompts Chips Carousel -->
+      @if (chatService.suggestedPrompts().length > 0) {
+        <div class="suggested-chips-bar">
+          <span class="chips-label">Suggestions:</span>
+          <div class="chips-scroll">
+            @for (prompt of chatService.suggestedPrompts(); track prompt) {
+              <button
+                type="button"
+                class="prompt-chip"
+                (click)="onPromptClick(prompt)"
+                [disabled]="chatService.isLoading()"
+              >
+                {{ prompt }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Input Footer -->
+      <div class="chat-popup-footer">
+        <form (ngSubmit)="onSend()" class="input-form">
+          <input
+            type="text"
+            class="chat-input"
+            [(ngModel)]="inputMessage"
+            name="chatMessage"
+            placeholder="Ask anything about projects, invoices..."
+            (keydown)="onKeyDown($event)"
+            [disabled]="chatService.isLoading()"
+            autocomplete="off"
+          />
+          <button
+            type="submit"
+            class="send-btn"
+            [disabled]="!inputMessage().trim() || chatService.isLoading()"
+            title="Send Message"
+          >
+            @if (chatService.isLoading()) {
+              <i class="pi pi-spin pi-spinner"></i>
+            } @else {
+              <i class="pi pi-send"></i>
+            }
+          </button>
+        </form>
+        <div class="footer-meta">
+          <span>LanceNexa Intelligent Platform Intelligence</span>
+        </div>
+      </div>
+    </div>
+  }
+</div>

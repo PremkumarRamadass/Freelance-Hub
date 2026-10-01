@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ChatService } from '../../core/services/chat.service';
 
 @Component({
   selector: 'app-header',
@@ -14,6 +15,7 @@ import { NotificationService } from '../../core/services/notification.service';
 export class HeaderComponent {
   authService = inject(AuthService);
   notificationService = inject(NotificationService);
+  chatService = inject(ChatService);
 
   showUserMenu = signal<boolean>(false);
 

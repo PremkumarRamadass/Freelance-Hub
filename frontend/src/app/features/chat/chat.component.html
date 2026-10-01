@@ -1,0 +1,211 @@
+<div class="chat-page-container">
+  <!-- Left Channels Panel -->
+  <aside class="channels-sidebar" [class.mobile-open]="showMobileChannels()">
+    <div class="channels-header">
+      <div class="header-title">
+        <i class="pi pi-comments text-indigo-400"></i>
+        <span>Messages & Assistant</span>
+      </div>
+      <button
+        type="button"
+        class="mobile-close-btn"
+        (click)="showMobileChannels.set(false)"
+      >
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <!-- Active User Profile Banner -->
+    <div class="user-channel-card">
+      <img
+        [src]="authService.currentUser()?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'"
+        alt="User Avatar"
+        class="avatar-img"
+      />
+      <div class="user-details">
+        <strong class="user-name">{{ authService.currentUser()?.name }}</strong>
+        <span class="user-badge" [class]="authService.userRole().toLowerCase()">
+          {{ authService.userRole() }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Channel Category -->
+    <div class="channels-section-label">Conversation Threads</div>
+
+    <div class="channels-list">
+      @for (ch of chatService.channels(); track ch.id) {
+        <div
+          class="channel-item"
+          [class.active]="chatService.activeChannel() === ch.id"
+          (click)="selectChannel(ch)"
+        >
+          <div class="channel-icon-wrap" [class.ai]="ch.id === 'ai-assistant'">
+            <i [class]="'pi ' + ch.icon"></i>
+            <span class="status-indicator"></span>
+          </div>
+          <div class="channel-info">
+            <div class="channel-name-row">
+              <span class="channel-name">{{ ch.name }}</span>
+              @if (ch.badge) {
+                <span class="channel-tag">{{ ch.badge }}</span>
+              }
+            </div>
+            <span class="channel-desc">{{ ch.description }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Quick Help Note -->
+    <div class="channels-footer-tip">
+      <i class="pi pi-sparkles text-amber-400"></i>
+      <div>
+        <strong>Instant AI Q&A</strong>
+        <p>Ask Nexa anything about your platform contracts, billing, or proposals.</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Right Chat Area -->
+  <main class="chat-main-area">
+    <!-- Chat Header -->
+    <header class="main-chat-header">
+      <div class="active-channel-details">
+        <button
+          type="button"
+          class="mobile-menu-btn"
+          (click)="showMobileChannels.set(true)"
+          title="Toggle Threads"
+        >
+          <i class="pi pi-bars"></i>
+        </button>
+
+        <div class="channel-avatar">
+          <i class="pi pi-bolt"></i>
+        </div>
+        <div class="channel-titles">
+          <h3>Nexa AI Assistant</h3>
+          <span class="status-subtitle">
+            <i class="pi pi-circle-fill text-emerald-400"></i>
+            Connected to Lance Nexa Live Database • Instant Answers
+          </span>
+        </div>
+      </div>
+
+      <div class="main-header-actions">
+        <button
+          type="button"
+          class="btn-action"
+          (click)="chatService.clearChat()"
+          title="Clear Conversation History"
+        >
+          <i class="pi pi-trash"></i>
+          <span>Clear</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Message Thread Stream -->
+    <div class="messages-stream" #scrollContainer>
+      @for (msg of chatService.messages(); track msg.id) {
+        <div
+          class="chat-bubble-row"
+          [class.is-user]="msg.senderRole === 'user'"
+          [class.is-assistant]="msg.senderRole === 'assistant'"
+        >
+          @if (msg.senderRole === 'assistant') {
+            <div class="assistant-avatar">
+              <i class="pi pi-bolt"></i>
+            </div>
+          }
+
+          <div class="bubble-content-wrap">
+            <div
+              class="message-card"
+              [innerHTML]="formatMessage(msg.message)"
+            ></div>
+
+            <!-- Action buttons in response -->
+            @if (msg.actionLinks && msg.actionLinks.length > 0) {
+              <div class="action-links-row">
+                @for (link of msg.actionLinks; track link.route) {
+                  <a [routerLink]="link.route" class="action-chip-btn">
+                    <i [class]="'pi ' + link.icon"></i>
+                    <span>{{ link.label }}</span>
+                  </a>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Loading / Typing Indicator -->
+      @if (chatService.isLoading()) {
+        <div class="chat-bubble-row is-assistant">
+          <div class="assistant-avatar">
+            <i class="pi pi-bolt"></i>
+          </div>
+          <div class="bubble-content-wrap">
+            <div class="message-card typing-card">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Suggested Prompts Row -->
+    @if (chatService.suggestedPrompts().length > 0) {
+      <div class="prompts-suggestion-strip">
+        <span class="suggestion-tag"><i class="pi pi-sparkles"></i> Suggested:</span>
+        <div class="prompts-pills">
+          @for (prompt of chatService.suggestedPrompts(); track prompt) {
+            <button
+              type="button"
+              class="prompt-pill"
+              (click)="onPromptClick(prompt)"
+              [disabled]="chatService.isLoading()"
+            >
+              {{ prompt }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Chat Input Composer -->
+    <div class="chat-composer-bar">
+      <form (ngSubmit)="onSend()" class="composer-form">
+        <textarea
+          rows="1"
+          class="composer-textarea"
+          [(ngModel)]="inputMessage"
+          name="message"
+          placeholder="Ask Nexa about projects, tasks, invoices, platform rules..."
+          (keydown)="onKeyDown($event)"
+          [disabled]="chatService.isLoading()"
+        ></textarea>
+
+        <button
+          type="submit"
+          class="btn-send"
+          [disabled]="!inputMessage().trim() || chatService.isLoading()"
+          title="Send message (Enter)"
+        >
+          @if (chatService.isLoading()) {
+            <i class="pi pi-spin pi-spinner"></i>
+          } @else {
+            <i class="pi pi-send"></i>
+          }
+        </button>
+      </form>
+      <div class="composer-hint">
+        <span>Press <kbd>Enter</kbd> to send, <kbd>Shift + Enter</kbd> for a new line</span>
+      </div>
+    </div>
+  </main>
+</div>
